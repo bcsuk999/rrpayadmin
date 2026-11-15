@@ -108,7 +108,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
           <LineSpinner
             size={size === 'sm' ? 14 : 16}
             stroke={2}
-            speed={1}
+            speed={1.3}
             color="currentColor"
           />
           <span>{loadingText ?? children}</span>
