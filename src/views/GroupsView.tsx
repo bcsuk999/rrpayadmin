@@ -92,6 +92,10 @@ export default function GroupsView({
       toast.error('Please select a group first.')
       return
     }
+    if (updateStatus && updateStatus !== selectedGroup.status && !updateRemark.trim()) {
+      toast.error('Remark is required when changing status.')
+      return
+    }
     const body: Record<string, unknown> = {
       status: updateStatus,
       remark: updateRemark,
