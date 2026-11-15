@@ -303,3 +303,28 @@ toast.info('Logged out')
 <ToastContainer />
 ```
 
+### Table — `src/components/Table*.tsx`
+
+Table building blocks ported from the reference: `TableCard` (surface),
+`TableCardHeading` (gradient title + subtitle + actions), `DataTable`
+(horizontal scroll wrapper), `Pagination` and `TableFooter`.
+
+| Component          | Key props                                              |
+| ------------------ | ------------------------------------------------------ |
+| `TableCard`        | `className`, `children`                                |
+| `TableCardHeading` | `title`, `subtitle`, `actions`                          |
+| `DataTable`        | `wide`, `compact`, `className`, `children` (thead/tbody)|
+| `Pagination`       | `page`, `totalPages`, `disabled`, `directInput`, `showPageSizes`, `pageSize`, `pageSizes`, `onChange`, `onSizeChange` |
+| `TableFooter`      | `page`, `totalPages`, `total`, `pageSize`, `pageSizes`, `onChange`, `onSizeChange` |
+
+```tsx
+<TableCard>
+  <TableCardHeading title="Users (12)" subtitle="Page 1 / 2" />
+  <DataTable>
+    <thead><tr><th>UID</th><th>Mobile</th></tr></thead>
+    <tbody>...</tbody>
+  </DataTable>
+  <TableFooter page={page} totalPages={totalPages} total={total} onChange={setPage} />
+</TableCard>
+```
+

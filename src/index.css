@@ -191,7 +191,79 @@
 .sidebar-logo, .sidebar-badge, .sidebar-mark { font-family: var(--font-heading); }
 .sidebar-brand { font-family: var(--font-heading); }
 .el-menu-item.is-active { color: #ebaf5b; }
-.el-menu--vertical .el-menu-item.is-active { color: #ebaf5b; }
+/* ===== Table ===== */
+.admin-card.admin-table-card {
+  padding: 16px;
+}
+.table-card-heading .title {
+  background: linear-gradient(120deg, #ebaf5b, #f0c078);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.admin-table-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow: auto;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-table-scroll .admin-table {
+  width: 100%;
+  min-width: 760px;
+  color: #606266;
+  background: #fff;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+.admin-table-scroll .admin-table.admin-table--wide {
+  min-width: 1150px;
+}
+.admin-table-scroll .admin-table.admin-table--compact {
+  min-width: 0;
+}
+.admin-table-scroll .admin-table th,
+.admin-table-scroll .admin-table td {
+  padding: 8px 10px;
+  text-align: center;
+  vertical-align: middle;
+  background: #fff;
+  border-right: 1px solid #ebeef5;
+  border-bottom: 1px solid #ebeef5;
+  transition: background-color 0.25s ease;
+}
+.admin-table-scroll .admin-table th:last-child,
+.admin-table-scroll .admin-table td:last-child {
+  border-right: 0;
+}
+.admin-table-scroll .admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admin-table-scroll .admin-table th {
+  color: #606266;
+  background: #fff;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.admin-table-scroll .admin-table tbody tr:hover td {
+  background: #fff;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  font-size: 12px;
+}
+.badge--success { background: #67c23a; color: #fff; }
+.badge--warning { background: #e6a23c; color: #fff; }
+.badge--danger { background: #f56c6c; color: #fff; }
+.badge--info { background: #ebaf5b; color: #fff; }
 
 /* responsive hide helpers for header */
 .hide-mobile { display: inline-flex; }

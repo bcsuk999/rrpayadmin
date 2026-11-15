@@ -6,6 +6,10 @@ import FilterCard from './components/FilterCard'
 import Header from './components/Header'
 import Input from './components/Input'
 import Login from './components/Login'
+import TableCard from './components/TableCard'
+import TableCardHeading from './components/TableCardHeading'
+import DataTable from './components/DataTable'
+import TableFooter from './components/TableFooter'
 import SelectDropdown from './components/SelectDropdown'
 import Sidebar from './components/Sidebar'
 import TagsView from './components/TagsView'
@@ -79,6 +83,24 @@ function App() {
   const [pageTitle, setPageTitle] = useState('dashboard')
   const [showTags, setShowTags] = useState(true)
   const [showStats, setShowStats] = useState(true)
+
+  const [tablePage, setTablePage] = useState(1)
+  const [tablePageSize, setTablePageSize] = useState(10)
+
+  const tableRows = [
+    { uid: '1001', mobile: '9876543210', status: 'Active', balance: '1,250.00' },
+    { uid: '1002', mobile: '9876543211', status: 'Active', balance: '890.50' },
+    { uid: '1003', mobile: '9876543212', status: 'Suspended', balance: '0.00' },
+    { uid: '1004', mobile: '9876543213', status: 'Banned', balance: '42.10' },
+    { uid: '1005', mobile: '9876543214', status: 'Active', balance: '3,400.00' },
+    { uid: '1006', mobile: '9876543215', status: 'Active', balance: '120.00' },
+    { uid: '1007', mobile: '9876543216', status: 'Suspended', balance: '5.00' },
+    { uid: '1008', mobile: '9876543217', status: 'Active', balance: '777.77' },
+    { uid: '1009', mobile: '9876543218', status: 'Active', balance: '2,100.00' },
+    { uid: '1010', mobile: '9876543219', status: 'Banned', balance: '0.00' },
+    { uid: '1011', mobile: '9876543220', status: 'Active', balance: '560.00' },
+    { uid: '1012', mobile: '9876543221', status: 'Active', balance: '999.99' },
+  ]
 
   const resetFilters = () => {
     setGroupId('')
@@ -426,6 +448,79 @@ function App() {
                 Clear all
               </Button>
             </div>
+          </Card>
+          <Card
+            title="Table"
+            subtitle="TableCard, gradient heading, scrollable DataTable and paginated footer."
+          >
+            <TableCard>
+              <TableCardHeading
+                title={`Users (${tableRows.length})`}
+                subtitle={`Page ${tablePage} / ${Math.max(1, Math.ceil(tableRows.length / tablePageSize))}`}
+                actions={
+                  <Button variant="ghost" size="sm">
+                    Export
+                  </Button>
+                }
+              />
+              <DataTable>
+                <thead>
+                  <tr>
+                    <th>UID</th>
+                    <th>Mobile</th>
+                    <th>Status</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableRows
+                    .slice(
+                      (tablePage - 1) * tablePageSize,
+                      tablePage * tablePageSize,
+                    )
+                    .map((row) => (
+                      <tr key={row.uid}>
+                        <td className="mono">{row.uid}</td>
+                        <td className="mono">{row.mobile}</td>
+                        <td>
+                          <span
+                            className={[
+                              'badge',
+                              row.status === 'Active'
+                                ? 'badge--success'
+                                : row.status === 'Banned'
+                                  ? 'badge--danger'
+                                  : 'badge--warning',
+                            ].join(' ')}
+                          >
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="mono">{row.balance}</td>
+                        <td>
+                          <div className="cell-actions flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              Edit
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </DataTable>
+              <TableFooter
+                page={tablePage}
+                totalPages={Math.max(1, Math.ceil(tableRows.length / tablePageSize))}
+                total={tableRows.length}
+                pageSize={tablePageSize}
+                onChange={setTablePage}
+                onSizeChange={(size) => {
+                  setTablePageSize(size)
+                  setTablePage(1)
+                }}
+              />
+            </TableCard>
           </Card>
           <Card
             title="Sidebar & Header shell"
