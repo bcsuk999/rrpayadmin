@@ -191,6 +191,55 @@
 .sidebar-logo, .sidebar-badge, .sidebar-mark { font-family: var(--font-heading); }
 .sidebar-brand { font-family: var(--font-heading); }
 .el-menu-item.is-active { color: #ebaf5b; }
+/* ===== App layout ===== */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: #dcdfe6;
+}
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+.app-content {
+  flex: 1;
+  overflow: hidden;
+}
+.route-transition {
+  height: 100%;
+  animation: routeEnter 0.3s ease;
+}
+@keyframes routeEnter {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7, 28px);
+  height: 100%;
+  overflow-y: auto;
+}
+.tags-view-wrap {
+  max-height: 80px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+.tags-view-wrap.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+}
 /* ===== Table ===== */
 .admin-card.admin-table-card {
   padding: 16px;

@@ -84,13 +84,13 @@ export default function TagsView({
   return (
     <div
       className={[
-        'tags-view flex items-center h-[35.2px] px-2 border-b border-card-border bg-[var(--color-header-bg,#324157)] shrink-0',
+        'tags-view flex items-center h-[35.2px] px-2 border-b border-card-border bg-[var(--color-header-bg,#324157)] shrink-0 overflow-hidden max-h-[80px] transition-[max-height,opacity] duration-300 opacity-100',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="tags-view__scroll flex items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap h-full scrollbar-none">
+      <div className="tags-view__scroll flex items-center gap-2 overflow-x-auto overflow-y-hidden whitespace-nowrap h-full">
         {tags.map((tag) => {
           const active = tag.path === currentPath
           return (
