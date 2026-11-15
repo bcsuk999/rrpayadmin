@@ -8,6 +8,8 @@ import Input from './components/Input'
 import SelectDropdown from './components/SelectDropdown'
 import Sidebar from './components/Sidebar'
 import TagsView from './components/TagsView'
+import ToastContainer from './components/Toast'
+import { useToast } from './components/Toast'
 
 const PlusIcon = (
   <svg
@@ -61,6 +63,7 @@ const dropdownOptions = [
 
 function App() {
   const [date, setDate] = useState('')
+  const toast = useToast()
   const [groupId, setGroupId] = useState('')
   const [uid, setUid] = useState('')
 
@@ -360,6 +363,50 @@ function App() {
           </Card>
 
           <Card
+            title="Toast"
+            subtitle="Viewport toasts: success, error, warning, info with auto-dismiss."
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant="success"
+                size="sm"
+                onClick={() => toast.success('Action completed successfully')}
+              >
+                Success
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => toast.error('Something went wrong. Please try again.')}
+              >
+                Error
+              </Button>
+              <Button
+                variant="warning"
+                size="sm"
+                onClick={() => toast.warning('Please review before continuing.')}
+              >
+                Warning
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toast.info('Logged out')}
+              >
+                Info
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  toast.clear()
+                }}
+              >
+                Clear all
+              </Button>
+            </div>
+          </Card>
+          <Card
             title="Sidebar & Header shell"
             subtitle="Integrated layout preview: collapsible rail and mobile drawer."
           >
@@ -486,6 +533,7 @@ function App() {
           RRPAY Admin · React + TypeScript + Tailwind CSS
         </p>
       </div>
+      <ToastContainer />
     </main>
   )
 }

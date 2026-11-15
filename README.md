@@ -262,3 +262,27 @@ horizontal scroll. Controlled or self-managing based on `currentPath`.
 The home page (`src/App.tsx`) renders every component, variant and state as a
 visual checklist.
 
+### Toast — `src/components/Toast.tsx`
+
+Viewport toasts with auto-dismiss: `success`, `error`, `warning`, `info`.
+Module-level store so `useToast()` works anywhere; render `<ToastContainer />`
+once (e.g. in your layout).
+
+| Export          | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| `useToast()`    | Returns `{ toasts, add, dismiss, clear, success, error, warning, info }` |
+| `ToastContainer`| Renders the toasts into `document.body`                  |
+| `addToast`      | Imperative helper                                        |
+
+```tsx
+const toast = useToast()
+
+toast.success('Action completed successfully')
+toast.error('Something went wrong')
+toast.warning('Please review')
+toast.info('Logged out')
+
+// in layout:
+<ToastContainer />
+```
+
