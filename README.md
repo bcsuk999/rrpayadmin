@@ -143,9 +143,6 @@ title/description header, optional header actions and an animated collapse.
 </FilterCard>
 ```
 
-The home page (`src/App.tsx`) renders every component, variant and state as a
-visual checklist.
-
 ### SelectDropdown — `src/components/SelectDropdown.tsx`
 
 Custom select ported from the reference: 32px trigger, options panel with
@@ -259,8 +256,28 @@ horizontal scroll. Controlled or self-managing based on `currentPath`.
 />
 ```
 
-The home page (`src/App.tsx`) renders every component, variant and state as a
-visual checklist.
+### Login — `src/components/Login.tsx`
+
+Full-page sign-in card: brand + badge, mobile number + password fields,
+validation message, and a loading submit button (uses the Button spinner).
+
+| Prop            | Type                              | Default                  |
+| --------------- | --------------------------------- | ------------------------ |
+| `brand`         | `string`                          | `RRPAY`                  |
+| `badge`         | `string`                          | `Admin`                  |
+| `title`         | `string`                          | `Sign in to your account`|
+| `loading`       | `boolean`                         | uncontrolled             |
+| `errorMessage`  | `string`                          | —                        |
+| `onSubmit`      | `(mobile, password) => void \| Promise<void>` | — |
+| `className`     | `string`                          | —                        |
+
+```tsx
+<Login
+  onSubmit={async (mobile, password) => {
+    await adminLogin(mobile, password)
+  }}
+/>
+```
 
 ### Toast — `src/components/Toast.tsx`
 

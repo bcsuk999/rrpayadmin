@@ -5,6 +5,7 @@ import DatePicker from './components/DatePicker'
 import FilterCard from './components/FilterCard'
 import Header from './components/Header'
 import Input from './components/Input'
+import Login from './components/Login'
 import SelectDropdown from './components/SelectDropdown'
 import Sidebar from './components/Sidebar'
 import TagsView from './components/TagsView'
@@ -362,6 +363,26 @@ function App() {
             </p>
           </Card>
 
+          <Card
+            title="Login page"
+            subtitle="Full-page sign-in card: brand, mobile + password, validation and loading."
+          >
+            <div className="overflow-hidden rounded-lg border border-card-border">
+              <Login
+                onSubmit={async (mobile, _password) => {
+                  // Demo: accept any non-empty credentials.
+                  await new Promise((r) => setTimeout(r, 600))
+                  if (mobile === 'fail') {
+                    throw new Error('Invalid credentials')
+                  }
+                  toast.success(`Welcome, ${mobile}`)
+                }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-ink-soft">
+              Try submitting empty fields, or mobile "fail" for an error toast.
+            </p>
+          </Card>
           <Card
             title="Toast"
             subtitle="Viewport toasts: success, error, warning, info with auto-dismiss."
