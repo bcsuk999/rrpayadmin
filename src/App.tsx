@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import Button from './components/Button'
 import Card from './components/Card'
+import DatePicker from './components/DatePicker'
+import FilterCard from './components/FilterCard'
+import Input from './components/Input'
 
 const PlusIcon = (
   <svg
@@ -44,6 +48,16 @@ const CheckIcon = (
 )
 
 function App() {
+  const [date, setDate] = useState('')
+  const [groupId, setGroupId] = useState('')
+  const [uid, setUid] = useState('')
+
+  const resetFilters = () => {
+    setGroupId('')
+    setUid('')
+    setDate('')
+  }
+
   return (
     <main className="min-h-svh px-6 py-10 sm:px-10">
       <div className="mx-auto max-w-5xl">
@@ -54,7 +68,8 @@ function App() {
             </p>
             <h1 className="mt-1 text-2xl font-semibold text-ink">Components</h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Button and Card, built to match the reference admin.
+              Button, Card, Input, DatePicker and FilterCard, built to match the
+              reference admin.
             </p>
           </div>
           <code className="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-active">
@@ -75,9 +90,6 @@ function App() {
               <Button variant="danger">Danger</Button>
               <Button variant="warning">Warning</Button>
             </div>
-            <p className="mt-4 text-xs text-ink-muted">
-              Hover, press and keyboard-focus states are live — try them.
-            </p>
           </Card>
 
           <Card
@@ -179,6 +191,109 @@ function App() {
               </Button>
             </div>
           </Card>
+
+          <Card
+            title="Input & date picker"
+            subtitle="32px fields with the reference border, focus ring and calendar panel."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="Group ID"
+                placeholder="Please enter group ID to search"
+              />
+              <Input
+                label="UID"
+                placeholder="Please enter UID to search"
+                defaultValue="10245"
+                inputMode="numeric"
+              />
+              <Input
+                label="Disabled"
+                placeholder="Please enter a value"
+                disabled
+              />
+              <Input
+                label="With error"
+                defaultValue="abc"
+                error="Enter a valid number"
+              />
+            </div>
+
+            <div className="mt-6 border-t border-slate-200 pt-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                Date picker
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <DatePicker value={date} onChange={setDate} />
+                <span className="text-xs text-ink-muted">
+                  Selected: {date || 'none'}
+                </span>
+                <DatePicker placeholder="Disabled picker" disabled />
+              </div>
+            </div>
+          </Card>
+
+          <FilterCard
+            title="Group filters"
+            description="Inline labels, 32px fields and a collapsible body."
+            actions={
+              <Button variant="ghost" size="sm">
+                Export
+              </Button>
+            }
+          >
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-[18px] max-sm:flex-col max-sm:items-stretch">
+              <div className="flex items-center max-sm:flex-col max-sm:items-stretch">
+                <label
+                  htmlFor="filter-group-id"
+                  className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0"
+                >
+                  Group ID
+                </label>
+                <div className="w-[150px] max-sm:w-full">
+                  <Input
+                    id="filter-group-id"
+                    placeholder="Please enter group ID"
+                    value={groupId}
+                    onChange={(event) => setGroupId(event.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center max-sm:flex-col max-sm:items-stretch">
+                <label
+                  htmlFor="filter-uid"
+                  className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0"
+                >
+                  UID
+                </label>
+                <div className="w-[150px] max-sm:w-full">
+                  <Input
+                    id="filter-uid"
+                    placeholder="Please enter UID"
+                    maxLength={5}
+                    inputMode="numeric"
+                    value={uid}
+                    onChange={(event) => setUid(event.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center max-sm:flex-col max-sm:items-stretch">
+                <span className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
+                  Date
+                </span>
+                <DatePicker value={date} onChange={setDate} />
+              </div>
+            </div>
+
+            <div className="mt-[18px] flex flex-wrap items-center justify-end gap-2.5 border-t border-card-border pt-[15px]">
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                Reset
+              </Button>
+              <Button size="sm">Search</Button>
+            </div>
+          </FilterCard>
         </div>
 
         <p className="mt-8 text-center text-xs text-ink-muted">
