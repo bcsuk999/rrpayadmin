@@ -1,4 +1,5 @@
 import Button from './components/Button'
+import Card from './components/Card'
 
 const PlusIcon = (
   <svg
@@ -51,24 +52,22 @@ function App() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
               RRPAY Admin
             </p>
-            <h1 className="mt-1 text-2xl font-semibold text-ink">Button</h1>
+            <h1 className="mt-1 text-2xl font-semibold text-ink">Components</h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Every variant, size and state of the shared button component.
+              Button and Card, built to match the reference admin.
             </p>
           </div>
           <code className="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-active">
-            src/components/Button.tsx
+            src/components/
           </code>
         </header>
 
         <div className="flex flex-col gap-6">
-          {/* Variants */}
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.08)]">
-            <h2 className="text-base font-semibold text-ink">Variants</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Solid actions, quiet secondary actions and semantic feedback.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Card
+            title="Button variants"
+            subtitle="Solid actions, quiet secondary actions and semantic feedback."
+          >
+            <div className="flex flex-wrap items-center gap-3">
               <Button variant="primary">Primary</Button>
               <Button variant="ghost">Ghost</Button>
               <Button variant="outline">Outline</Button>
@@ -79,15 +78,13 @@ function App() {
             <p className="mt-4 text-xs text-ink-muted">
               Hover, press and keyboard-focus states are live — try them.
             </p>
-          </section>
+          </Card>
 
-          {/* Sizes */}
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.08)]">
-            <h2 className="text-base font-semibold text-ink">Sizes</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Two heights matching the reference admin: 32px and 34px.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Card
+            title="Sizes"
+            subtitle="Two heights matching the reference admin: 32px and 34px."
+          >
+            <div className="flex flex-wrap items-center gap-3">
               <Button size="sm">Small</Button>
               <Button size="md">Medium</Button>
               <Button variant="ghost" size="sm">
@@ -97,16 +94,14 @@ function App() {
                 Medium ghost
               </Button>
             </div>
-          </section>
+          </Card>
 
-          {/* States */}
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.08)]">
-            <h2 className="text-base font-semibold text-ink">States</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Disabled and loading states, with a spinner in currentColor.
-            </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-4">
+          <Card
+            title="States"
+            subtitle="Disabled and loading states. Loading uses the ldrs LineSpinner."
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 bg-[#f8f9fb] p-4">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                   Disabled
                 </p>
@@ -120,7 +115,7 @@ function App() {
                   </Button>
                 </div>
               </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-4">
+              <div className="rounded-lg border border-slate-200 bg-[#f8f9fb] p-4">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                   Loading
                 </p>
@@ -137,15 +132,13 @@ function App() {
                 </div>
               </div>
             </div>
-          </section>
+          </Card>
 
-          {/* Icons + full width */}
-          <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.08)]">
-            <h2 className="text-base font-semibold text-ink">Icons &amp; width</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Optional leading/trailing icons and a full-width option.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Card
+            title="Icons & width"
+            subtitle="Optional leading/trailing icons and a full-width option."
+          >
+            <div className="flex flex-wrap items-center gap-3">
               <Button leftIcon={PlusIcon}>Add user</Button>
               <Button variant="ghost" rightIcon={ArrowIcon}>
                 Next
@@ -159,7 +152,33 @@ function App() {
                 Continue
               </Button>
             </div>
-          </section>
+          </Card>
+
+          <Card
+            title="Card"
+            subtitle="White surface, #e4e7ed border, 8px radius and the reference shadow."
+            actions={
+              <Button variant="ghost" size="sm">
+                Header action
+              </Button>
+            }
+          >
+            <p className="text-sm text-ink-muted">
+              Pass <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">title</code>,{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">subtitle</code> and{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">actions</code> for
+              the optional header, or use it as a plain padded surface. This
+              entire section is one Card.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button variant="primary" size="sm">
+                Primary action
+              </Button>
+              <Button variant="ghost" size="sm">
+                Secondary
+              </Button>
+            </div>
+          </Card>
         </div>
 
         <p className="mt-8 text-center text-xs text-ink-muted">

@@ -38,5 +38,35 @@ import Button from './components/Button'
 <Button variant="danger" loading loadingText="Deleting…">Delete</Button>
 ```
 
+The loading state uses [ldrs](https://uiball.com/ldrs) `LineSpinner`, tinted with the
+button's `currentColor`.
+
+### Card — `src/components/Card.tsx`
+
+Reference admin surface: white background, `#e4e7ed` border, 8px radius, 16px
+padding and the two-layer card shadow.
+
+| Prop            | Type        | Default |
+| --------------- | ----------- | ------- |
+| `title`         | `ReactNode` | —       |
+| `subtitle`      | `ReactNode` | —       |
+| `actions`       | `ReactNode` | —       |
+| `bodyClassName` | `string`    | —       |
+
+Native `<section>` attributes and `ref` are forwarded. The header only renders
+when at least one of `title`, `subtitle` or `actions` is provided.
+
+```tsx
+import Card from './components/Card'
+
+<Card
+  title="Settlement summary"
+  subtitle="Last 24 hours"
+  actions={<Button variant="ghost" size="sm">View all</Button>}
+>
+  <p>Card body content.</p>
+</Card>
+```
+
 The home page (`src/App.tsx`) renders every variant, size and state as a visual
 checklist.

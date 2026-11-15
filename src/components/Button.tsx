@@ -1,4 +1,10 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import {
+  forwardRef,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from 'react'
+import { LineSpinner } from 'ldrs/react'
+import 'ldrs/react/LineSpinner.css'
 
 export type ButtonVariant =
   | 'primary'
@@ -99,9 +105,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     >
       {loading ? (
         <>
-          <span
-            aria-hidden="true"
-            className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+          <LineSpinner
+            size={size === 'sm' ? 14 : 16}
+            stroke={2}
+            speed={1}
+            color="currentColor"
           />
           <span>{loadingText ?? children}</span>
         </>

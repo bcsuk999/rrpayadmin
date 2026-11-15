@@ -32,6 +32,8 @@
   --color-page: #f5f7fa;
   --color-ink: #303133;
   --color-ink-muted: #606266;
+  --color-ink-soft: #909399;
+  --color-card-border: #e4e7ed;
 }
 
 @layer base {
