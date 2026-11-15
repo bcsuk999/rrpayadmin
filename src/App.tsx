@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Header from './components/Header'
 import Login from './components/Login'
+import Register from './components/Register'
 import Sidebar from './components/Sidebar'
 import TagsView from './components/TagsView'
 import ToastContainer, { useToast } from './components/Toast'
@@ -18,6 +19,7 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [groupsPage, setGroupsPage] = useState(1)
   const [groupsLimit, setGroupsLimit] = useState(20)
 
@@ -57,11 +59,41 @@ function App() {
   if (!user) {
     return (
       <>
-        <Login
-          onSubmit={handleLogin}
-          loading={loginLoading}
-          errorMessage={loginError}
-        />
+        <div className="mb-4 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAuthMode('login')}
+            className={[
+              'rounded-full border px-4 py-1.5 text-sm font-medium transition-[background-color,color] duration-200',
+              authMode === 'login'
+                ? 'border-brand bg-brand text-white'
+                : 'border-card-border bg-white text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand',
+            ].join(' ')}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            onClick={() => setAuthMode('register')}
+            className={[
+              'rounded-full border px-4 py-1.5 text-sm font-medium transition-[background-color,color] duration-200',
+              authMode === 'register'
+                ? 'border-brand bg-brand text-white'
+                : 'border-card-border bg-white text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand',
+            ].join(' ')}
+          >
+            Register
+          </button>
+        </div>
+        {authMode === 'login' ? (
+          <Login
+            onSubmit={handleLogin}
+            loading={loginLoading}
+            errorMessage={loginError}
+          />
+        ) : (
+          <Register />
+        )}
         <ToastContainer />
       </>
     )
