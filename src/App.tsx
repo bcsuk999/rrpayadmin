@@ -3,7 +3,10 @@ import Button from './components/Button'
 import Card from './components/Card'
 import DatePicker from './components/DatePicker'
 import FilterCard from './components/FilterCard'
+import Header from './components/Header'
 import Input from './components/Input'
+import SelectDropdown from './components/SelectDropdown'
+import Sidebar from './components/Sidebar'
 
 const PlusIcon = (
   <svg
@@ -47,10 +50,30 @@ const CheckIcon = (
   </svg>
 )
 
+const dropdownOptions = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'banned', label: 'Banned' },
+  { value: 'disabled', label: 'Disabled option', disabled: true },
+]
+
 function App() {
   const [date, setDate] = useState('')
   const [groupId, setGroupId] = useState('')
   const [uid, setUid] = useState('')
+
+  const [dropdownValue, setDropdownValue] = useState<string | number>('all')
+  const [topDropdownValue, setTopDropdownValue] = useState<string | number>('')
+
+  const [collapsed, setCollapsed] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [currentPath, setCurrentPath] = useState('/dashboard')
+  const [currentTab, setCurrentTab] = useState('groups')
+
+  const [pageTitle, setPageTitle] = useState('dashboard')
+  const [showTags, setShowTags] = useState(true)
+  const [showStats, setShowStats] = useState(true)
 
   const resetFilters = () => {
     setGroupId('')
@@ -68,8 +91,8 @@ function App() {
             </p>
             <h1 className="mt-1 text-2xl font-semibold text-ink">Components</h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Button, Card, Input, DatePicker and FilterCard, built to match the
-              reference admin.
+              Button, Card, Input, DatePicker, FilterCard, SelectDropdown,
+              Sidebar and Header, built to match the reference admin.
             </p>
           </div>
           <code className="rounded-full bg-brand-soft px-3 py-1 text-xs font-medium text-brand-active">
@@ -294,6 +317,155 @@ function App() {
               <Button size="sm">Search</Button>
             </div>
           </FilterCard>
+
+          <Card
+            title="Select dropdown"
+            subtitle="Custom select: 32px trigger, options panel, keyboard nav, top/bottom placement."
+          >
+            <div className="flex flex-wrap items-end gap-6">
+              <div className="w-[160px]">
+                <p className="mb-1.5 text-[13px] text-btn-ghost">Status (bottom)</p>
+                <SelectDropdown
+                  value={dropdownValue}
+                  onChange={setDropdownValue}
+                  options={dropdownOptions}
+                  placeholder="All"
+                />
+              </div>
+              <div className="w-[160px]">
+                <p className="mb-1.5 text-[13px] text-btn-ghost">Placement top</p>
+                <SelectDropdown
+                  value={topDropdownValue}
+                  onChange={setTopDropdownValue}
+                  options={['Option A', 'Option B', 'Option C']}
+                  placeholder="Choose"
+                  placement="top"
+                />
+              </div>
+              <div className="w-[160px]">
+                <p className="mb-1.5 text-[13px] text-btn-ghost">Disabled</p>
+                <SelectDropdown
+                  value=""
+                  options={dropdownOptions}
+                  placeholder="Disabled"
+                  disabled
+                />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-ink-muted">
+              Selected: {String(dropdownValue || 'none')} /{' '}
+              {String(topDropdownValue || 'none')}
+            </p>
+          </Card>
+
+          <Card
+            title="Sidebar & Header shell"
+            subtitle="Integrated layout preview: collapsible rail and mobile drawer."
+          >
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setCollapsed((v) => !v)}
+              >
+                {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setMobileOpen((v) => !v)}
+              >
+                {mobileOpen ? 'Close drawer' : 'Open drawer'}
+              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-ink-muted">Page title</span>
+                <SelectDropdown
+                  value={pageTitle}
+                  onChange={(v: string | number) => setPageTitle(String(v))}
+                  options={[
+                    { value: 'dashboard', label: 'Dashboard' },
+                    { value: 'users', label: 'Users' },
+                    { value: 'banks', label: 'Banks' },
+                    { value: 'bot', label: 'Bot' },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-lg border border-card-border">
+              <div
+                className="flex h-[420px]"
+                style={{
+                  ['--sidebar-width' as string]: '242px',
+                  ['--layout-sidebar-width' as string]: '242px',
+                  ['--layout-sidebar-collapsed-width' as string]: '64px',
+                }}
+              >
+                <Sidebar
+                  collapsed={collapsed}
+                  mobileOpen={mobileOpen}
+                  currentPath={currentPath}
+                  currentTab={currentTab}
+                  brand="RRPAY"
+                  badge="Admin"
+                  onClose={() => setMobileOpen(false)}
+                  onToggleCollapse={() => setCollapsed((v) => !v)}
+                  onNavigate={(item) => {
+                    if (item.to) setCurrentPath(item.to)
+                    setMobileOpen(false)
+                  }}
+                  onNavigateChild={(parent, child) => {
+                    if (parent.to) setCurrentPath(parent.to)
+                    setCurrentTab(child.key)
+                    setMobileOpen(false)
+                  }}
+                />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <Header
+                    collapsed={collapsed}
+                    pageTitle={pageTitle}
+                    showTags={showTags}
+                    showStats={showStats}
+                    onToggleSidebar={() => setCollapsed((v) => !v)}
+                    onToggleMobile={() => setMobileOpen((v) => !v)}
+                    onShowTagsChange={setShowTags}
+                    onShowStatsChange={setShowStats}
+                    onLogout={() => alert('Logged out')}
+                  />
+                  <div className="flex-1 overflow-auto bg-page p-4">
+                    <p className="text-sm text-ink-muted">
+                      Content area. Current path:{' '}
+                      <code className="rounded bg-white px-1 py-0.5 text-xs">
+                        {currentPath}
+                      </code>{' '}
+                      {currentPath === '/bot' && (
+                        <>
+                          · tab{' '}
+                          <code className="rounded bg-white px-1 py-0.5 text-xs">
+                            {currentTab}
+                          </code>
+                        </>
+                      )}
+                    </p>
+                    <p className="mt-2 text-xs text-ink-soft">
+                      Tags view: {showTags ? 'on' : 'off'} · Static cards:{' '}
+                      {showStats ? 'on' : 'off'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {mobileOpen && (
+                <div
+                  className="fixed inset-0 z-[999] bg-black/40"
+                  onClick={() => setMobileOpen(false)}
+                />
+              )}
+            </div>
+            <p className="mt-2 text-xs text-ink-soft">
+              On screens ≤880px the sidebar becomes a fixed drawer. Try
+              resizing the browser or use the mobile toggle.
+            </p>
+          </Card>
         </div>
 
         <p className="mt-8 text-center text-xs text-ink-muted">

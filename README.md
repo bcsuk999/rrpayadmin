@@ -146,3 +146,95 @@ title/description header, optional header actions and an animated collapse.
 The home page (`src/App.tsx`) renders every component, variant and state as a
 visual checklist.
 
+### SelectDropdown — `src/components/SelectDropdown.tsx`
+
+Custom select ported from the reference: 32px trigger, options panel with
+hover/selected states, keyboard navigation (Enter/Space/Arrows/Home/End/
+Escape/Tab), top or bottom placement, and outside-click/Escape closing.
+
+| Prop          | Type                                  | Default |
+| ------------- | ------------------------------------- | ------- |
+| `value`       | `string \| number`                    | —       |
+| `onChange`    | `(value) => void`                     | —       |
+| `options`     | `(SelectOption \| string \| number)[]` | —       |
+| `placement`   | `top \| bottom`                       | `bottom`|
+| `placeholder` | `string`                              | `All`   |
+| `disabled`    | `boolean`                             | `false` |
+| `id`          | `string`                              | —       |
+| `ariaLabel`   | `string`                              | —       |
+| `className`   | `string`                              | —       |
+
+```tsx
+<SelectDropdown
+  value={status}
+  onChange={setStatus}
+  options={[
+    { value: 'active', label: 'Active' },
+    { value: 'banned', label: 'Banned', disabled: true },
+  ]}
+  placement="bottom"
+/>
+```
+
+### Sidebar — `src/components/Sidebar.tsx`
+
+Admin navigation rail: 242px expanded / 64px collapsed rail, navy `#324157`
+background, brand + Admin badge (mark when collapsed), nav items with
+children flyouts, mobile drawer at ≤880px, amber active state.
+
+| Prop               | Type                              | Default        |
+| ------------------ | --------------------------------- | -------------- |
+| `collapsed`        | `boolean`                         | `false`        |
+| `mobileOpen`       | `boolean`                         | `false`        |
+| `brand`            | `string`                          | `RRPAY`        |
+| `badge`            | `string`                          | `Admin`        |
+| `footerTitle`      | `string`                          | `{brand} Admin Panel` |
+| `footerSubtitle`   | `string`                          | `Manage users & transactions` |
+| `items`            | `SidebarNavItem[]`                | reference nav  |
+| `currentPath`      | `string`                          | `/`            |
+| `currentTab`       | `string`                          | —              |
+| `onClose`          | `() => void`                      | —              |
+| `onNavigate`       | `(item) => void`                  | —              |
+| `onNavigateChild`  | `(parent, child) => void`         | —              |
+
+```tsx
+<Sidebar
+  collapsed={collapsed}
+  mobileOpen={mobileOpen}
+  currentPath={path}
+  onClose={() => setMobileOpen(false)}
+  onNavigate={(item) => item.to && setPath(item.to)}
+/>
+```
+
+### Header — `src/components/Header.tsx`
+
+50px navy sticky bar: desktop collapse toggle, mobile menu toggle, breadcrumb
+(Home / page), settings dropdown (View tags / Static cards), account dropdown
+(Logout) and fullscreen toggle.
+
+| Prop               | Type                      | Default     |
+| ------------------ | ------------------------- | ----------- |
+| `collapsed`        | `boolean`                 | `false`     |
+| `pageTitle`        | `string`                  | `Dashboard` |
+| `homeLabel`        | `string`                  | `Home`      |
+| `showTags`         | `boolean`                 | `true`      |
+| `showStats`        | `boolean`                 | `true`      |
+| `onToggleSidebar`  | `() => void`              | —           |
+| `onToggleMobile`   | `() => void`              | —           |
+| `onShowTagsChange` | `(value: boolean) => void`| —           |
+| `onShowStatsChange`| `(value: boolean) => void` | —           |
+| `onLogout`         | `() => void`              | —           |
+
+```tsx
+<Header
+  collapsed={collapsed}
+  pageTitle="Dashboard"
+  showTags={showTags}
+  onToggleSidebar={() => setCollapsed((v) => !v)}
+  onToggleMobile={() => setMobileOpen((v) => !v)}
+  onShowTagsChange={setShowTags}
+  onLogout={logout}
+/>
+```
+
