@@ -7,6 +7,7 @@ import Header from './components/Header'
 import Input from './components/Input'
 import SelectDropdown from './components/SelectDropdown'
 import Sidebar from './components/Sidebar'
+import TagsView from './components/TagsView'
 
 const PlusIcon = (
   <svg
@@ -432,6 +433,19 @@ function App() {
                     onShowStatsChange={setShowStats}
                     onLogout={() => alert('Logged out')}
                   />
+                  {showTags && (
+                    <div
+                      className={[
+                        'tags-view-wrap transition-[max-height] duration-200 overflow-hidden',
+                        showTags ? '' : 'max-h-0',
+                      ].join(' ')}
+                    >
+                      <TagsView
+                        currentPath={currentPath}
+                        onNavigate={(p) => setCurrentPath(p)}
+                      />
+                    </div>
+                  )}
                   <div className="flex-1 overflow-auto bg-page p-4">
                     <p className="text-sm text-ink-muted">
                       Content area. Current path:{' '}

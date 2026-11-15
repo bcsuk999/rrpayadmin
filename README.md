@@ -238,3 +238,27 @@ children flyouts, mobile drawer at ≤880px, amber active state.
 />
 ```
 
+### TagsView — `src/components/TagsView.tsx`
+
+Visited-page tabs bar (the "view tags" feature toggled from the header):
+navy background, amber active tag, close button per tag (except Home),
+horizontal scroll. Controlled or self-managing based on `currentPath`.
+
+| Prop          | Type                      | Default |
+| ------------- | ------------------------- | ------- |
+| `tags`        | `TagItem[]`               | internal |
+| `currentPath` | `string`                  | `/`     |
+| `onNavigate`  | `(path: string) => void`  | —       |
+| `onClose`     | `(path: string) => void`  | —       |
+| `titleMap`    | `Record<string,string>`   | built-in |
+
+```tsx
+<TagsView
+  currentPath={path}
+  onNavigate={(p) => setPath(p)}
+/>
+```
+
+The home page (`src/App.tsx`) renders every component, variant and state as a
+visual checklist.
+
