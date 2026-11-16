@@ -293,8 +293,8 @@ export default function PayinsView({
               ) : (
                 payins.map((p) => (
                   <tr key={p._id}>
-                    <td className="mono">{p.payOrderNo || '—'}</td>
-                    <td className="mono">{p.outTradeNo || '—'}</td>
+                    <td className="mono">{formatValue(p.payOrderNo)}</td>
+                    <td className="mono">{formatValue(p.outTradeNo)}</td>
                     <td>
                       <div className="flex flex-col">
                         <span className="mono">{formatValue(p.uid || p.group?.uid)}</span>
@@ -322,7 +322,7 @@ export default function PayinsView({
                             size="sm"
                             onClick={() => {
                               setApprovePayin(p)
-                              setApproveUtr(p.utrCode || '')
+                              setApproveUtr(formatValue(p.utrCode) === '—' ? '' : formatValue(p.utrCode))
                             }}
                           >
                             Approve
@@ -358,7 +358,7 @@ export default function PayinsView({
         >
           <div className="w-full max-w-[720px] rounded-md border border-card-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.1)]" role="dialog" aria-modal="true">
             <div className="flex items-center justify-between gap-3 border-b border-card-border px-4 py-3.5">
-              <h3 className="text-base font-semibold text-ink">Payin Details — {viewPayin.payOrderNo || viewPayin._id}</h3>
+              <h3 className="text-base font-semibold text-ink">Payin Details — {formatValue(viewPayin.payOrderNo) !== '—' ? formatValue(viewPayin.payOrderNo) : formatValue(viewPayin._id)}</h3>
               <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded border border-btn-border bg-page text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand" aria-label="Close" onClick={() => setViewPayin(null)}>×</button>
             </div>
             <div className="grid max-h-[70vh] gap-2 overflow-auto px-4 py-4 text-sm sm:grid-cols-2">
@@ -404,7 +404,7 @@ export default function PayinsView({
         >
           <div className="w-full max-w-[420px] rounded-md border border-card-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.1)]" role="dialog" aria-modal="true">
             <div className="flex items-center justify-between gap-3 border-b border-card-border px-4 py-3.5">
-              <h3 className="text-base font-semibold text-ink">Approve Payin — {approvePayin.payOrderNo || approvePayin._id}</h3>
+              <h3 className="text-base font-semibold text-ink">Approve Payin — {formatValue(approvePayin.payOrderNo) !== '—' ? formatValue(approvePayin.payOrderNo) : formatValue(approvePayin._id)}</h3>
               <button type="button" className="inline-flex h-8 w-8 items-center justify-center rounded border border-btn-border bg-page text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand" aria-label="Close" onClick={() => !approving && setApprovePayin(null)} disabled={approving}>×</button>
             </div>
             <div className="flex flex-col gap-3 px-4 py-4">
