@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import Login from './components/Login'
 import Register from './components/Register'
@@ -43,6 +43,15 @@ function App() {
     setPath('/groups')
     toast.info('Logged out')
   }
+
+  useEffect(() => {
+    const onSessionCleared = () => {
+      setUser(null)
+      setPath('/groups')
+    }
+    window.addEventListener('rrpay:session-cleared', onSessionCleared)
+    return () => window.removeEventListener('rrpay:session-cleared', onSessionCleared)
+  }, [])
 
   const navigate = (to?: string) => {
     setPath(to ?? '/groups')

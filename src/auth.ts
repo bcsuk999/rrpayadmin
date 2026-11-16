@@ -28,6 +28,9 @@ export function clearSession() {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
   localStorage.removeItem(EXPIRY_KEY)
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('rrpay:session-cleared'))
+  }
 }
 
 export function isAuthenticated(): boolean {
