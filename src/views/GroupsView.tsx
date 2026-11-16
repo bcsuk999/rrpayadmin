@@ -172,12 +172,7 @@ export default function GroupsView({
 
   return (
     <div className="flex flex-col gap-4">
-      <FilterCard
-        title="Group filters"
-        description="Search by UID, group name or Telegram chat id."
-        open
-        collapsible={false}
-      >
+      <FilterCard title="Filters" open collapsible={false}>
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center">
             <label htmlFor="groups-search" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
