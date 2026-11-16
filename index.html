@@ -13,28 +13,43 @@
     <script>
       (function () {
         var LOCAL_STORAGE_KEY = 'app_version';
-        fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
-          .then(function (response) { return response.json(); })
-          .then(function (data) {
-            var latestVersion = data.version;
-            var storedVersion = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (storedVersion && latestVersion !== storedVersion) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
-              window.location.reload();
-            } else if (!storedVersion) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
+        var CHECK_INTERVAL_MS = 30000;
+
+        function bustAssets(version) {
+          var assets = document.querySelectorAll('script[src], link[href]');
+          for (var i = 0; i < assets.length; i++) {
+            var el = assets[i];
+            var attr = el.tagName === 'SCRIPT' ? 'src' : 'href';
+            var href = el.getAttribute(attr);
+            if (href && href.indexOf('?v=') === -1) {
+              el.setAttribute(attr, href + '?v=' + version);
             }
-            var assets = document.querySelectorAll('script[src], link[href]');
-            for (var i = 0; i < assets.length; i++) {
-              var el = assets[i];
-              var attr = el.tagName === 'SCRIPT' ? 'src' : 'href';
-              var href = el.getAttribute(attr);
-              if (href && href.indexOf('?v=') === -1) {
-                el.setAttribute(attr, href + '?v=' + latestVersion);
+          }
+        }
+
+        function checkVersion(initial) {
+          fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+              var latestVersion = data.version;
+              var storedVersion = localStorage.getItem(LOCAL_STORAGE_KEY);
+              if (storedVersion && latestVersion !== storedVersion) {
+                localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
+                window.location.reload();
+                return;
               }
-            }
-          })
-          .catch(function () { /* Silent fail */ });
+              if (!storedVersion) {
+                localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
+              }
+              if (initial) {
+                bustAssets(latestVersion);
+              }
+            })
+            .catch(function () { /* Silent fail */ });
+        }
+
+        checkVersion(true);
+        window.setInterval(function () { checkVersion(false); }, CHECK_INTERVAL_MS);
       })();
     </script>
   </head>
