@@ -142,7 +142,7 @@ export default function Header({
   return (
     <header
       className={[
-        'app-header flex items-center justify-between h-[50px] bg-[var(--color-header-bg,#324157)] text-white shrink-0 sticky top-0 z-30 shadow-[0_1px_4px_rgba(21,41,0.08)] overflow-visible',
+        'app-header flex items-center justify-between h-[50px] bg-[var(--color-header-bg,#324157)] text-white shrink-0 sticky top-0 z-30 overflow-visible',
         className,
       ]
         .filter(Boolean)

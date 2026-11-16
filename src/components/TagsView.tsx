@@ -84,7 +84,7 @@ export default function TagsView({
   return (
     <div
       className={[
-        'tags-view flex items-center h-[35.2px] px-2 border-b border-card-border bg-[var(--color-header-bg,#324157)] shrink-0 overflow-hidden max-h-[80px] transition-[max-height,opacity] duration-300 opacity-100',
+        'tags-view flex items-center h-[35.2px] px-2 bg-[var(--color-header-bg,#324157)] shrink-0 overflow-hidden max-h-[80px] transition-[max-height,opacity] duration-300 opacity-100',
         className,
       ]
         .filter(Boolean)
