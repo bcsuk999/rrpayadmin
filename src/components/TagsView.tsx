@@ -8,6 +8,7 @@ export interface TagItem {
 const defaultTitleMap: Record<string, string> = {
   '/': 'Dashboard',
   '/dashboard': 'Dashboard',
+  '/groups': 'Groups',
   '/users': 'Users',
   '/banks': 'Banks',
   '/payin-config': 'Payin Config',
@@ -42,8 +43,8 @@ export default function TagsView({
   titleMap = defaultTitleMap,
   className = '',
 }: TagsViewProps) {
-  const [internalTags, setInternalTags] = useState<TagItem[]>([
-    { path: '/', title: 'Dashboard' },
+  const [internalTags, setInternalTags] = useState<TagItem[]>(() => [
+    { path: currentPath, title: titleMap[currentPath] || currentPath },
   ])
 
   const isControlled = tagsProp !== undefined
@@ -65,15 +66,14 @@ export default function TagsView({
   }, [currentPath, isControlled, titleMap])
 
   const handleClose = (path: string) => {
-    if (path === '/') return
     if (!isControlled) {
       setInternalTags((prev) => {
         const idx = prev.findIndex((t) => t.path === path)
-        if (idx === -1) return prev
+        if (idx === -1 || prev.length <= 1) return prev
         const next = prev.filter((t) => t.path !== path)
         if (currentPath === path) {
           const last = next[next.length - 1]
-          onNavigate?.(last ? last.path : '/')
+          onNavigate?.(last ? last.path : currentPath)
         }
         return next
       })
@@ -106,7 +106,7 @@ export default function TagsView({
               ].join(' ')}
             >
               {tag.title}
-              {tag.path !== '/' && (
+              {tags.length > 1 && (
                 <span
                   className="tags-view-item-close inline-flex items-center justify-center w-4 h-4 ml-0.5 text-sm leading-none rounded-full transition-colors duration-200 hover:bg-black/10"
                   aria-hidden="true"

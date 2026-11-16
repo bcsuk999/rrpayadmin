@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import DataTable from '../components/DataTable'
 import FilterCard from '../components/FilterCard'
@@ -8,7 +8,7 @@ import TableCard from '../components/TableCard'
 import TableCardHeading from '../components/TableCardHeading'
 import TableFooter from '../components/TableFooter'
 import { getAdminGroups, updateAdminGroup } from '../api/client'
-import { useToast } from '../components/Toast'
+import { addToast } from '../components/Toast'
 import type { AdminGroup } from '../api/client'
 
 export interface GroupsViewProps {
@@ -31,16 +31,22 @@ export default function GroupsView({
   onPageChange,
   onLimitChange,
 }: GroupsViewProps = {}) {
-  const toast = useToast()
   const [internalPage, setInternalPage] = useState(1)
   const [internalLimit, setInternalLimit] = useState(20)
 
   const page = controlledPage ?? internalPage
   const limit = controlledLimit ?? internalLimit
 
-  const [search, setSearch] = useState('')
-  const [uid, setUid] = useState('')
-  const [status, setStatus] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [uidInput, setUidInput] = useState('')
+  const [statusInput, setStatusInput] = useState('')
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: '',
+    uid: '',
+    status: '',
+  })
+  const [refreshKey, setRefreshKey] = useState(0)
+
   const [groups, setGroups] = useState<AdminGroup[]>([])
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
@@ -52,49 +58,73 @@ export default function GroupsView({
   const [updateExchangeRate, setUpdateExchangeRate] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const fetchGroups = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await getAdminGroups({ page, limit, uid, status, search })
-      setGroups(data.groups ?? [])
-      const count = data.count ?? data.total ?? 0
-      setTotal(count)
-      setTotalPages(Math.max(1, Math.ceil(count / (limit || 20))))
-    } catch (e) {
-      const msg = (e as Error)?.message || 'Failed to fetch groups'
-      setGroups([])
-      setTotal(0)
-      setTotalPages(1)
-      toast.error(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [page, limit, uid, status, search, toast])
-
   useEffect(() => {
-    void fetchGroups()
-  }, [fetchGroups])
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await getAdminGroups({
+          page,
+          limit,
+          uid: appliedFilters.uid,
+          status: appliedFilters.status,
+          search: appliedFilters.search,
+        })
+        if (cancelled) return
+        setGroups(data.groups ?? [])
+        const count = data.count ?? data.total ?? 0
+        setTotal(count)
+        setTotalPages(Math.max(1, Math.ceil(count / (limit || 20))))
+      } catch (e) {
+        if (cancelled) return
+        const msg = (e as Error)?.message || 'Failed to fetch groups'
+        setGroups([])
+        setTotal(0)
+        setTotalPages(1)
+        addToast(msg, 'error')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [page, limit, appliedFilters, refreshKey])
+
+  const setPage = (next: number) => {
+    setInternalPage(next)
+    onPageChange?.(next)
+  }
 
   const handleSearch = () => {
-    setInternalPage(1)
-    void fetchGroups()
+    setPage(1)
+    setAppliedFilters({
+      search: searchInput,
+      uid: uidInput,
+      status: statusInput,
+    })
   }
 
   const handleReset = () => {
-    setSearch('')
-    setUid('')
-    setStatus('')
-    setInternalPage(1)
-    void fetchGroups()
+    setSearchInput('')
+    setUidInput('')
+    setStatusInput('')
+    setPage(1)
+    setAppliedFilters({ search: '', uid: '', status: '' })
+  }
+
+  const handleRefresh = () => {
+    setRefreshKey((k) => k + 1)
   }
 
   const handleUpdate = async () => {
     if (!selectedGroup) {
-      toast.error('Please select a group first.')
+      addToast('Please select a group first.', 'error')
       return
     }
     if (updateStatus && updateStatus !== selectedGroup.status && !updateRemark.trim()) {
-      toast.error('Remark is required when changing status.')
+      addToast('Remark is required when changing status.', 'error')
       return
     }
     const body: Record<string, unknown> = {
@@ -105,12 +135,12 @@ export default function GroupsView({
     setSaving(true)
     try {
       const data = await updateAdminGroup(selectedGroup._id, body)
-      toast.success((data.msg as string) || 'Group updated')
+      addToast((data.msg as string) || 'Group updated', 'success')
       setSelectedGroup(null)
-      void fetchGroups()
+      setRefreshKey((k) => k + 1)
     } catch (e) {
       const msg = (e as Error)?.message || 'Failed to update group'
-      toast.error(msg)
+      addToast(msg, 'error')
     } finally {
       setSaving(false)
     }
@@ -143,8 +173,8 @@ export default function GroupsView({
               <Input
                 id="groups-search"
                 placeholder="Search by uid, groupName or groupId"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSearch()
                 }}
@@ -161,8 +191,8 @@ export default function GroupsView({
                 placeholder="Please enter UID"
                 maxLength={10}
                 inputMode="numeric"
-                value={uid}
-                onChange={(e) => setUid(e.target.value)}
+                value={uidInput}
+                onChange={(e) => setUidInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSearch()
                 }}
@@ -176,10 +206,9 @@ export default function GroupsView({
             <div className="w-[160px] max-sm:w-full">
               <SelectDropdown
                 id="groups-status"
-                value={status}
+                value={statusInput}
                 onChange={(v) => {
-                  const next = String(v)
-                  setStatus(next)
+                  setStatusInput(String(v))
                 }}
                 options={statusOptions}
               />
@@ -201,7 +230,7 @@ export default function GroupsView({
           title={`Groups (${total})`}
           subtitle={`Page ${page} / ${totalPages || 1}`}
           actions={
-            <Button variant="ghost" size="sm" onClick={handleReset}>
+            <Button variant="ghost" size="sm" onClick={handleRefresh}>
               Refresh
             </Button>
           }
@@ -273,12 +302,12 @@ export default function GroupsView({
             pageSize={limit}
             disabled={loading}
             onChange={(next) => {
-              setInternalPage(next)
-              onPageChange?.(next)
+              setPage(next)
             }}
             onSizeChange={(next) => {
               setInternalLimit(next)
               onLimitChange?.(next)
+              setPage(1)
             }}
           />
         </>
