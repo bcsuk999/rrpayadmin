@@ -11,6 +11,20 @@ import { getAdminGroups, updateAdminGroup } from '../api/client'
 import { addToast } from '../components/Toast'
 import type { AdminGroup } from '../api/client'
 
+function formatDecimal(value: unknown): string {
+  if (value == null) return ''
+  if (typeof value === 'object') {
+    const v = value as { $numberDecimal?: string; toString?: () => string }
+    if (typeof v.$numberDecimal === 'string') return v.$numberDecimal
+    if (typeof v.toString === 'function') {
+      const s = v.toString()
+      if (s !== '[object Object]') return s
+    }
+    return ''
+  }
+  return String(value)
+}
+
 export interface GroupsViewProps {
   page?: number
   limit?: number
@@ -152,7 +166,7 @@ export default function GroupsView({
     if (group) {
       setUpdateStatus(group.status || 'active')
       setUpdateRemark(group.remark || '')
-      setUpdateExchangeRate(group.exchangeRate ? String(group.exchangeRate) : '')
+      setUpdateExchangeRate(formatDecimal(group.exchangeRate))
     }
   }
 
@@ -276,8 +290,8 @@ export default function GroupsView({
                         {group.status}
                       </span>
                     </td>
-                    <td className="mono">{String(group.exchangeRate)}</td>
-                    <td className="mono">{group.balance}</td>
+                    <td className="mono">{formatDecimal(group.exchangeRate)}</td>
+                    <td className="mono">{formatDecimal(group.balance)}</td>
                     <td className="muted">{group.remark || '—'}</td>
                     <td>
                       <div className="cell-actions flex gap-2">
