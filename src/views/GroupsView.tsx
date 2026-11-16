@@ -32,6 +32,13 @@ export interface GroupsViewProps {
   onLimitChange?: (limit: number) => void
 }
 
+const statusOptions = [
+  { value: '', label: 'All statuses' },
+  { value: 'active', label: 'Active' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'banned', label: 'Banned' },
+]
+
 export default function GroupsView({
   page: controlledPage,
   limit: controlledLimit,
@@ -46,9 +53,11 @@ export default function GroupsView({
 
   const [uidInput, setUidInput] = useState('')
   const [groupIdInput, setGroupIdInput] = useState('')
+  const [statusInput, setStatusInput] = useState('')
   const [appliedFilters, setAppliedFilters] = useState({
     uid: '',
     groupId: '',
+    status: '',
   })
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -76,6 +85,7 @@ export default function GroupsView({
           limit,
           uid: appliedFilters.uid,
           groupId: appliedFilters.groupId,
+          status: appliedFilters.status,
         })
         if (cancelled) return
         setGroups(data.groups ?? [])
@@ -109,14 +119,16 @@ export default function GroupsView({
     setAppliedFilters({
       uid: uidInput.trim(),
       groupId: groupIdInput.trim(),
+      status: statusInput,
     })
   }
 
   const handleReset = () => {
     setUidInput('')
     setGroupIdInput('')
+    setStatusInput('')
     setPage(1)
-    setAppliedFilters({ uid: '', groupId: '' })
+    setAppliedFilters({ uid: '', groupId: '', status: '' })
   }
 
   const handleRefresh = () => {
@@ -230,6 +242,19 @@ export default function GroupsView({
               />
             </div>
           </div>
+          <div className="flex items-center">
+            <label htmlFor="groups-status" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
+              Status
+            </label>
+            <div className="w-[160px] max-sm:w-full">
+              <SelectDropdown
+                id="groups-status"
+                value={statusInput}
+                onChange={(v) => setStatusInput(String(v))}
+                options={statusOptions}
+              />
+            </div>
+          </div>
           <div className="flex items-center gap-2.5">
             <Button size="sm" onClick={handleSearch}>
               Search
@@ -252,7 +277,7 @@ export default function GroupsView({
           }
         />
         <>
-          <DataTable>
+          <DataTable loading={loading}>
             <thead>
               <tr>
                 <th>UID</th>
@@ -269,7 +294,7 @@ export default function GroupsView({
               {groups.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="text-center text-sm">
-                    {loading ? 'Loading groups…' : 'No groups found. Try different filters.'}
+                    No groups found. Try different filters.
                   </td>
                 </tr>
               ) : (

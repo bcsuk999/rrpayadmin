@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import DataTable from '../components/DataTable'
+import DatePicker from '../components/DatePicker'
 import FilterCard from '../components/FilterCard'
 import Input from '../components/Input'
+import SelectDropdown from '../components/SelectDropdown'
 import TableCard from '../components/TableCard'
 import TableCardHeading from '../components/TableCardHeading'
 import TableFooter from '../components/TableFooter'
@@ -30,6 +32,14 @@ export interface PayinsViewProps {
   onPageChange?: (page: number) => void
   onLimitChange?: (limit: number) => void
 }
+
+const statusOptions = [
+  { value: '', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'success', label: 'Success' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'expired', label: 'Expired' },
+]
 
 function fmtDate(value?: string | null) {
   if (!value) return '—'
@@ -61,12 +71,22 @@ export default function PayinsView({
   const [groupIdInput, setGroupIdInput] = useState('')
   const [outTradeNoInput, setOutTradeNoInput] = useState('')
   const [payOrderNoInput, setPayOrderNoInput] = useState('')
+  const [statusInput, setStatusInput] = useState('')
+  const [upiInput, setUpiInput] = useState('')
+  const [amountInput, setAmountInput] = useState('')
+  const [createdFromInput, setCreatedFromInput] = useState('')
+  const [createdToInput, setCreatedToInput] = useState('')
 
   const [appliedFilters, setAppliedFilters] = useState({
     uid: '',
     groupId: '',
     outTradeNo: '',
     payOrderNo: '',
+    status: '',
+    upi: '',
+    amount: '',
+    createdFrom: '',
+    createdTo: '',
   })
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -92,6 +112,11 @@ export default function PayinsView({
           groupId: appliedFilters.groupId || undefined,
           outTradeNo: appliedFilters.outTradeNo || undefined,
           payOrderNo: appliedFilters.payOrderNo || undefined,
+          status: appliedFilters.status || undefined,
+          upi: appliedFilters.upi || undefined,
+          amount: appliedFilters.amount || undefined,
+          createdFrom: appliedFilters.createdFrom || undefined,
+          createdTo: appliedFilters.createdTo || undefined,
         })
         if (cancelled) return
         setPayins(data.payins ?? [])
@@ -127,6 +152,11 @@ export default function PayinsView({
       groupId: groupIdInput.trim(),
       outTradeNo: outTradeNoInput.trim(),
       payOrderNo: payOrderNoInput.trim(),
+      status: statusInput,
+      upi: upiInput.trim(),
+      amount: amountInput.trim(),
+      createdFrom: createdFromInput,
+      createdTo: createdToInput,
     })
   }
 
@@ -135,12 +165,22 @@ export default function PayinsView({
     setGroupIdInput('')
     setOutTradeNoInput('')
     setPayOrderNoInput('')
+    setStatusInput('')
+    setUpiInput('')
+    setAmountInput('')
+    setCreatedFromInput('')
+    setCreatedToInput('')
     setPage(1)
     setAppliedFilters({
       uid: '',
       groupId: '',
       outTradeNo: '',
       payOrderNo: '',
+      status: '',
+      upi: '',
+      amount: '',
+      createdFrom: '',
+      createdTo: '',
     })
   }
 
@@ -201,6 +241,48 @@ export default function PayinsView({
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
+          <div className="flex w-[160px] flex-col gap-1 max-sm:w-full">
+            <label className="text-sm text-btn-ghost">Status</label>
+            <SelectDropdown
+              value={statusInput}
+              onChange={(v) => setStatusInput(String(v))}
+              options={statusOptions}
+            />
+          </div>
+          <div className="flex w-[180px] flex-col gap-1 max-sm:w-full">
+            <label className="text-sm text-btn-ghost">UPI / VPA</label>
+            <Input
+              value={upiInput}
+              onChange={(e) => setUpiInput(e.target.value)}
+              placeholder="merchant@bank"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+          <div className="flex w-[140px] flex-col gap-1 max-sm:w-full">
+            <label className="text-sm text-btn-ghost">Amount</label>
+            <Input
+              value={amountInput}
+              onChange={(e) => setAmountInput(e.target.value)}
+              placeholder="100.00"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+          <div className="flex w-[220px] flex-col gap-1 max-sm:w-full">
+            <label className="text-sm text-btn-ghost">Created from</label>
+            <DatePicker
+              value={createdFromInput}
+              onChange={setCreatedFromInput}
+              placeholder="Created from"
+            />
+          </div>
+          <div className="flex w-[220px] flex-col gap-1 max-sm:w-full">
+            <label className="text-sm text-btn-ghost">Created to</label>
+            <DatePicker
+              value={createdToInput}
+              onChange={setCreatedToInput}
+              placeholder="Created to"
+            />
+          </div>
           <div className="flex items-center gap-2.5 pb-[1px]">
             <Button size="sm" onClick={handleSearch} loading={loading}>Search</Button>
             <Button size="sm" variant="ghost" onClick={handleReset} disabled={loading}>Reset</Button>
@@ -215,7 +297,7 @@ export default function PayinsView({
           actions={<Button variant="ghost" size="sm" onClick={() => setRefreshKey((k) => k + 1)}>Refresh</Button>}
         />
         <>
-          <DataTable wide>
+          <DataTable wide loading={loading}>
             <thead>
               <tr>
                 <th>Pay Order No</th>
@@ -233,7 +315,7 @@ export default function PayinsView({
               {payins.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="text-center text-sm">
-                    {loading ? 'Loading payins…' : 'No payins found. Try different filters.'}
+                    No payins found. Try different filters.
                   </td>
                 </tr>
               ) : (

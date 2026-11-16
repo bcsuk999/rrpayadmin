@@ -309,10 +309,10 @@
   border-radius: 20px;
   font-size: 12px;
 }
-.badge--success { background: #67c23a; color: #fff; }
-.badge--warning { background: #e6a23c; color: #fff; }
-.badge--danger { background: #f56c6c; color: #fff; }
-.badge--info { background: #ebaf5b; color: #fff; }
+.badge--success { background: transparent; border-color: #67c23a; color: #67c23a; }
+.badge--warning { background: transparent; border-color: #e6a23c; color: #e6a23c; }
+.badge--danger { background: transparent; border-color: #f56c6c; color: #f56c6c; }
+.badge--info { background: transparent; border-color: #ebaf5b; color: #ebaf5b; }
 
 /* responsive hide helpers for header */
 .hide-mobile { display: inline-flex; }
