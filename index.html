@@ -4,7 +4,39 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>RRPAY Admin</title>
+
+    <!-- Version Check & Cache Bust -->
+    <script>
+      (function () {
+        var LOCAL_STORAGE_KEY = 'app_version';
+        fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+          .then(function (response) { return response.json(); })
+          .then(function (data) {
+            var latestVersion = data.version;
+            var storedVersion = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedVersion && latestVersion !== storedVersion) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
+              window.location.reload();
+            } else if (!storedVersion) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, latestVersion);
+            }
+            var assets = document.querySelectorAll('script[src], link[href]');
+            for (var i = 0; i < assets.length; i++) {
+              var el = assets[i];
+              var attr = el.tagName === 'SCRIPT' ? 'src' : 'href';
+              var href = el.getAttribute(attr);
+              if (href && href.indexOf('?v=') === -1) {
+                el.setAttribute(attr, href + '?v=' + latestVersion);
+              }
+            }
+          })
+          .catch(function () { /* Silent fail */ });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
