@@ -295,7 +295,7 @@ export default function GroupsView({
                       {formatDecimal(group.exchangeRate) ? (
                         formatDecimal(group.exchangeRate)
                       ) : (
-                        <Button variant="ghost" size="sm" onClick={() => openDialog(group)}>
+                        <Button variant="primary" size="sm" onClick={() => openDialog(group)}>
                           Set
                         </Button>
                       )}
@@ -304,7 +304,7 @@ export default function GroupsView({
                     <td className="muted">{group.remark || '—'}</td>
                     <td>
                       <div className="cell-actions flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => openDialog(group)}>
+                        <Button variant="warning" size="sm" onClick={() => openDialog(group)}>
                           Change Status
                         </Button>
                       </div>
