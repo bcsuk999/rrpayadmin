@@ -128,8 +128,8 @@ function App() {
           }}
         />
         <main className="app-content flex flex-1 overflow-hidden">
-          <div className="route-transition h-full">
-            <div className="content flex h-full w-full flex-col gap-7 overflow-y-auto">
+          <div className="route-transition h-full w-full">
+            <div className="content mx-auto flex h-full w-full max-w-7xl flex-col gap-7 overflow-y-auto px-4 py-6 sm:px-6">
               {path === '/groups' ? (
                 <GroupsView
                   page={groupsPage}

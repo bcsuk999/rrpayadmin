@@ -167,6 +167,14 @@ function iconFor(key: string): ReactNode {
           <path d="M12 2v2M7 8h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4zM9 14h.01M15 14h.01M9 18h6" />
         </svg>
       )
+    case 'groups':
+      return (
+        <svg viewBox="0 0 24 24" {...common}>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      )
     default:
       return (
         <svg viewBox="0 0 24 24" {...common}>
@@ -408,6 +416,8 @@ export default function Sidebar({
                 aria-expanded={openSubmenuKey === item.key}
                 aria-controls={openSubmenuKey === item.key ? 'sidebar-submenu' : undefined}
                 tabIndex={collapsed ? 0 : -1}
+                title={item.label}
+                aria-label={item.label}
                 className={[
                   'el-submenu list-none',
                   active ? 'is-active' : '',
@@ -458,6 +468,8 @@ export default function Sidebar({
               key={item.key}
               role="menuitem"
               tabIndex={collapsed ? 0 : -1}
+              title={item.label}
+              aria-label={item.label}
               className={[
                 'el-menu-item flex items-center h-14 px-5 font-sans text-base font-normal leading-14 text-[#bfcbd9] bg-[var(--theme-sidebar,#324157)] whitespace-nowrap cursor-pointer transition-colors duration-300 hover:bg-[#283441]',
                 active ? 'is-active text-brand bg-[var(--theme-sidebar,#324157)]' : '',
