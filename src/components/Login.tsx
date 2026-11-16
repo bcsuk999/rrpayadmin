@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import Button from './Button'
 import Input from './Input'
+import { useToast } from './Toast'
 
 export interface LoginProps {
   /** Brand name. @default 'RRPAY' */
@@ -11,8 +12,6 @@ export interface LoginProps {
   title?: string
   /** Controlled loading state. When omitted, the component manages its own. */
   loading?: boolean
-  /** Error message shown above the submit button. */
-  errorMessage?: string
   /** Called with (mobile, password) on submit. May be async. */
   onSubmit?: (mobile: string, password: string) => void | Promise<void>
   className?: string
@@ -23,27 +22,23 @@ export default function Login({
   badge = 'Admin',
   title = 'Sign in to your account',
   loading: loadingProp,
-  errorMessage: errorMessageProp,
   onSubmit,
   className = '',
 }: LoginProps) {
+  const toast = useToast()
   const [mobile, setMobile] = useState('')
   const [password, setPassword] = useState('')
   const [internalLoading, setInternalLoading] = useState(false)
-  const [internalError, setInternalError] = useState('')
 
   const isControlled = loadingProp !== undefined
   const loading = isControlled ? (loadingProp as boolean) : internalLoading
-  const errorMessage = errorMessageProp ?? internalError
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setInternalError('')
 
     const trimmedMobile = mobile.trim()
     if (!trimmedMobile || !password) {
-      const msg = 'Please enter your mobile number and password.'
-      setInternalError(msg)
+      toast.error('Please enter your mobile number and password.')
       return
     }
 
@@ -52,15 +47,13 @@ export default function Login({
       try {
         await onSubmit(trimmedMobile, password)
       } catch (err) {
-        const msg = (err as Error)?.message || 'Login failed'
-        setInternalError(msg)
+        toast.error((err as Error)?.message || 'Login failed')
       } finally {
         if (!isControlled) setInternalLoading(false)
       }
       return
     }
 
-    // Default: simulate a request when no onSubmit is provided.
     setInternalLoading(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 800))
@@ -131,12 +124,6 @@ export default function Login({
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
-          {errorMessage && (
-            <p className="login-error text-sm leading-[1.4] text-danger" role="alert">
-              {errorMessage}
-            </p>
-          )}
 
           <Button
             type="submit"

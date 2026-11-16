@@ -7,8 +7,6 @@ import { useToast } from './Toast'
 export interface RegisterProps {
   /** Called after a successful registration. */
   onSuccess?: (message: string) => void
-  /** Error message from a failed registration. */
-  errorMessage?: string
   /** Controlled loading state. When omitted, the component manages its own. */
   loading?: boolean
   className?: string
@@ -16,7 +14,6 @@ export interface RegisterProps {
 
 export default function Register({
   onSuccess,
-  errorMessage: errorMessageProp,
   loading: loadingProp,
   className = '',
 }: RegisterProps) {
@@ -24,26 +21,19 @@ export default function Register({
   const [mobile, setMobile] = useState('')
   const [password, setPassword] = useState('')
   const [internalLoading, setInternalLoading] = useState(false)
-  const [internalError, setInternalError] = useState('')
 
   const isControlled = loadingProp !== undefined
   const loading = isControlled ? Boolean(loadingProp) : internalLoading
-  const errorMessage = errorMessageProp ?? internalError
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setInternalError('')
 
     if (!mobile.trim() || !password) {
-      const msg = 'Please enter your mobile number and password.'
-      setInternalError(msg)
-      toast.error(msg)
+      toast.error('Please enter your mobile number and password.')
       return
     }
     if (password.length < 6) {
-      const msg = 'Password must be at least 6 characters.'
-      setInternalError(msg)
-      toast.error(msg)
+      toast.error('Password must be at least 6 characters.')
       return
     }
 
@@ -54,9 +44,7 @@ export default function Register({
       toast.success(msg)
       onSuccess?.(msg)
     } catch (e) {
-      const msg = (e as Error).message || 'Registration failed'
-      setInternalError(msg)
-      toast.error(msg)
+      toast.error((e as Error).message || 'Registration failed')
     } finally {
       if (!isControlled) setInternalLoading(false)
     }
@@ -124,12 +112,6 @@ export default function Register({
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
-          {errorMessage && (
-            <p className="login-error text-sm leading-[1.4] text-danger" role="alert">
-              {errorMessage}
-            </p>
-          )}
 
           <Button
             type="submit"

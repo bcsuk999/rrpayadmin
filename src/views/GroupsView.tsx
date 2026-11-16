@@ -45,7 +45,6 @@ export default function GroupsView({
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null)
   const [updateStatus, setUpdateStatus] = useState('active')
@@ -55,7 +54,6 @@ export default function GroupsView({
 
   const fetchGroups = useCallback(async () => {
     setLoading(true)
-    setError('')
     try {
       const data = await getAdminGroups({ page, limit, uid, status, search })
       setGroups(data.groups ?? [])
@@ -64,7 +62,9 @@ export default function GroupsView({
       setTotalPages(Math.max(1, Math.ceil(count / (limit || 20))))
     } catch (e) {
       const msg = (e as Error)?.message || 'Failed to fetch groups'
-      setError(msg)
+      setGroups([])
+      setTotal(0)
+      setTotalPages(1)
       toast.error(msg)
     } finally {
       setLoading(false)
@@ -206,88 +206,82 @@ export default function GroupsView({
             </Button>
           }
         />
-        {error ? (
-          <p className="empty" role="alert">
-            {error}
-          </p>
-        ) : (
-          <>
-            <DataTable>
-              <thead>
+        <>
+          <DataTable>
+            <thead>
+              <tr>
+                <th>UID</th>
+                <th>Group ID</th>
+                <th>Group Name</th>
+                <th>Status</th>
+                <th>Exchange Rate</th>
+                <th>Balance</th>
+                <th>Remark</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groups.length === 0 ? (
                 <tr>
-                  <th>UID</th>
-                  <th>Group ID</th>
-                  <th>Group Name</th>
-                  <th>Status</th>
-                  <th>Exchange Rate</th>
-                  <th>Balance</th>
-                  <th>Remark</th>
-                  <th>Actions</th>
+                  <td colSpan={8} className="text-center text-sm">
+                    {loading ? 'Loading groups…' : 'No groups found. Try different filters.'}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {groups.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center text-sm">
-                      No groups found. Try different filters.
+              ) : (
+                groups.map((group) => (
+                  <tr key={group._id}>
+                    <td className="mono">{group.uid}</td>
+                    <td className="mono">{String(group.groupId)}</td>
+                    <td>{group.groupName}</td>
+                    <td>
+                      <span
+                        className={[
+                          'badge',
+                          group.status === 'active'
+                            ? 'badge--success'
+                            : group.status === 'suspended'
+                              ? 'badge--warning'
+                              : 'badge--danger',
+                        ].join(' ')}
+                      >
+                        {group.status}
+                      </span>
+                    </td>
+                    <td className="mono">{String(group.exchangeRate)}</td>
+                    <td className="mono">{group.balance}</td>
+                    <td className="muted">{group.remark || '—'}</td>
+                    <td>
+                      <div className="cell-actions flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => selectGroup(group._id)}
+                        >
+                          Update
+                        </Button>
+                      </div>
                     </td>
                   </tr>
-                ) : (
-                  groups.map((group) => (
-                    <tr key={group._id}>
-                      <td className="mono">{group.uid}</td>
-                      <td className="mono">{String(group.groupId)}</td>
-                      <td>{group.groupName}</td>
-                      <td>
-                        <span
-                          className={[
-                            'badge',
-                            group.status === 'active'
-                              ? 'badge--success'
-                              : group.status === 'suspended'
-                                ? 'badge--warning'
-                                : 'badge--danger',
-                          ].join(' ')}
-                        >
-                          {group.status}
-                        </span>
-                      </td>
-                      <td className="mono">{String(group.exchangeRate)}</td>
-                      <td className="mono">{group.balance}</td>
-                      <td className="muted">{group.remark || '—'}</td>
-                      <td>
-                        <div className="cell-actions flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => selectGroup(group._id)}
-                          >
-                            Update
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </DataTable>
-            <TableFooter
-              page={page}
-              totalPages={totalPages}
-              total={total}
-              pageSize={limit}
-              disabled={loading}
-              onChange={(next) => {
-                setInternalPage(next)
-                onPageChange?.(next)
-              }}
-              onSizeChange={(next) => {
-                setInternalLimit(next)
-                onLimitChange?.(next)
-              }}
-            />
-          </>
-        )}
+                ))
+              )}
+            </tbody>
+          </DataTable>
+          <TableFooter
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={limit}
+            disabled={loading}
+            onChange={(next) => {
+              setInternalPage(next)
+              onPageChange?.(next)
+            }}
+            onSizeChange={(next) => {
+              setInternalLimit(next)
+              onLimitChange?.(next)
+            }}
+          />
+        </>
 
         <div className="mt-5 border-t border-card-border pt-4">
           <h4 className="text-base font-semibold text-ink">Update group</h4>

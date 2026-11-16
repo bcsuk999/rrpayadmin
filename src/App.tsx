@@ -17,7 +17,6 @@ function App() {
   const [path, setPath] = useState('/groups')
   const [collapsed, setCollapsed] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [groupsPage, setGroupsPage] = useState(1)
@@ -25,7 +24,6 @@ function App() {
 
   const handleLogin = async (mobile: string, password: string) => {
     setLoginLoading(true)
-    setLoginError('')
     try {
       const data = await adminLogin(mobile, password)
       setSession(data.token ?? '', data.admin)
@@ -33,7 +31,7 @@ function App() {
       toast.success((data.msg as string) ?? 'Login successful')
       setPath('/groups')
     } catch (e) {
-      setLoginError((e as Error).message || 'Login failed')
+      toast.error((e as Error).message || 'Login failed')
     } finally {
       setLoginLoading(false)
     }
@@ -86,11 +84,7 @@ function App() {
           </button>
         </div>
         {authMode === 'login' ? (
-          <Login
-            onSubmit={handleLogin}
-            loading={loginLoading}
-            errorMessage={loginError}
-          />
+          <Login onSubmit={handleLogin} loading={loginLoading} />
         ) : (
           <Register />
         )}
@@ -158,6 +152,7 @@ function App() {
           onClick={() => setMobileOpen(false)}
         />
       )}
+      <ToastContainer />
     </div>
   )
 }
