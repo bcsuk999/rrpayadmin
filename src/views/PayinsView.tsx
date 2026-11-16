@@ -149,9 +149,34 @@ export default function PayinsView({
 
   const handleSearch = () => {
     setPage(1)
+    const uid = uidInput.trim()
+    if (uid) {
+      setQInput('')
+      setGroupIdInput('')
+      setStatusInput('')
+      setOutTradeNoInput('')
+      setPayOrderNoInput('')
+      setUpiInput('')
+      setAmountInput('')
+      setCreatedFromInput('')
+      setCreatedToInput('')
+      setAppliedFilters({
+        q: '',
+        uid,
+        groupId: '',
+        status: '',
+        outTradeNo: '',
+        payOrderNo: '',
+        upi: '',
+        amount: '',
+        createdFrom: '',
+        createdTo: '',
+      })
+      return
+    }
     setAppliedFilters({
       q: qInput.trim(),
-      uid: uidInput.trim(),
+      uid: '',
       groupId: groupIdInput.trim(),
       status: statusInput,
       outTradeNo: outTradeNoInput.trim(),
@@ -256,8 +281,8 @@ export default function PayinsView({
             <Input type="date" value={createdToInput} onChange={(e) => setCreatedToInput(e.target.value)} />
           </div>
           <div className="flex items-center gap-2.5 pb-[1px]">
-            <Button size="sm" onClick={handleSearch}>Search</Button>
-            <Button size="sm" variant="ghost" onClick={handleReset}>Reset</Button>
+            <Button size="sm" onClick={handleSearch} disabled={loading}>Search</Button>
+            <Button size="sm" variant="ghost" onClick={handleReset} disabled={loading}>Reset</Button>
           </div>
         </div>
       </FilterCard>
