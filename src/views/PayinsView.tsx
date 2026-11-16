@@ -281,7 +281,7 @@ export default function PayinsView({
             <Input type="date" value={createdToInput} onChange={(e) => setCreatedToInput(e.target.value)} />
           </div>
           <div className="flex items-center gap-2.5 pb-[1px]">
-            <Button size="sm" onClick={handleSearch} disabled={loading}>Search</Button>
+            <Button size="sm" onClick={handleSearch} loading={loading}>Search</Button>
             <Button size="sm" variant="ghost" onClick={handleReset} disabled={loading}>Reset</Button>
           </div>
         </div>
