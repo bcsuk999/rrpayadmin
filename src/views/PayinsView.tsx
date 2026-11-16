@@ -11,6 +11,20 @@ import { addToast } from '../components/Toast'
 import { approveAdminPayin, getAdminPayins } from '../api/client'
 import type { AdminPayin } from '../api/client'
 
+function formatValue(value: unknown): string {
+  if (value == null || value === '') return '—'
+  if (typeof value === 'object') {
+    const v = value as { $numberDecimal?: string; toString?: () => string }
+    if (typeof v.$numberDecimal === 'string') return v.$numberDecimal
+    if (typeof v.toString === 'function') {
+      const s = v.toString()
+      if (s !== '[object Object]') return s
+    }
+    return '—'
+  }
+  return String(value)
+}
+
 export interface PayinsViewProps {
   page?: number
   limit?: number
@@ -283,19 +297,21 @@ export default function PayinsView({
                     <td className="mono">{p.outTradeNo || '—'}</td>
                     <td>
                       <div className="flex flex-col">
-                        <span className="mono">{p.uid || p.group?.uid || '—'}</span>
-                        <span className="muted text-[11px]">{p.group?.groupName || (p.groupId != null ? String(p.groupId) : '')}</span>
+                        <span className="mono">{formatValue(p.uid || p.group?.uid)}</span>
+                        <span className="muted text-[11px]">
+                          {formatValue(p.group?.groupName || p.groupId || p.group?.groupId)}
+                        </span>
                       </div>
                     </td>
                     <td className="mono">
-                      {p.deeplinkAmount || p.totalAmount || '—'} {p.currencyCode || ''}
+                      {formatValue(p.deeplinkAmount ?? p.totalAmount)} {formatValue(p.currencyCode) === '—' ? '' : formatValue(p.currencyCode)}
                     </td>
-                    <td className="mono">{p.upiId || '—'}</td>
+                    <td className="mono">{formatValue(p.upiId)}</td>
                     <td>
-                      <span className={statusBadgeClass(p.status)}>{p.status || '—'}</span>
-                      {p.payState ? <div className="muted mt-1 text-[11px]">{p.payState}</div> : null}
+                      <span className={statusBadgeClass(p.status)}>{formatValue(p.status)}</span>
+                      {p.payState ? <div className="muted mt-1 text-[11px]">{formatValue(p.payState)}</div> : null}
                     </td>
-                    <td className="mono">{p.utrCode || '—'}</td>
+                    <td className="mono">{formatValue(p.utrCode)}</td>
                     <td className="muted text-[12px]">{fmtDate(p.createdAt)}</td>
                     <td>
                       <div className="cell-actions flex flex-wrap gap-2">
@@ -352,7 +368,7 @@ export default function PayinsView({
                 ['UID', viewPayin.uid || viewPayin.group?.uid],
                 ['Group ID', viewPayin.groupId ?? viewPayin.group?.groupId],
                 ['Group Name', viewPayin.group?.groupName],
-                ['Amount', `${viewPayin.deeplinkAmount || viewPayin.totalAmount || '—'} ${viewPayin.currencyCode || ''}`],
+                ['Amount', `${formatValue(viewPayin.deeplinkAmount ?? viewPayin.totalAmount)} ${formatValue(viewPayin.currencyCode) === '—' ? '' : formatValue(viewPayin.currencyCode)}`.trim()],
                 ['UPI', viewPayin.upiId],
                 ['Status', viewPayin.status],
                 ['Pay State', viewPayin.payState],
@@ -366,7 +382,11 @@ export default function PayinsView({
               ].map(([label, value]) => (
                 <div key={String(label)} className="flex flex-col gap-0.5 rounded border border-card-border bg-page/40 p-2">
                   <span className="text-[12px] text-ink-soft">{label}</span>
-                  <span className="mono break-all text-ink">{value != null && value !== '' ? String(value) : '—'}</span>
+                  <span className="mono break-all text-ink">
+                    {label === 'Created' || label === 'Updated' || label === 'Paid At'
+                      ? (value != null && value !== '' ? String(value) : '—')
+                      : formatValue(value)}
+                  </span>
                 </div>
               ))}
             </div>
