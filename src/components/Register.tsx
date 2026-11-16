@@ -49,7 +49,7 @@ export default function Register({
 
     if (!isControlled) setInternalLoading(true)
     try {
-      const data = await adminRegister(mobile.trim(), password)
+      const data = await adminRegister(mobile.trim(), password, 'admin')
       const msg = (data.msg as string) || 'Admin registered successfully'
       toast.success(msg)
       onSuccess?.(msg)

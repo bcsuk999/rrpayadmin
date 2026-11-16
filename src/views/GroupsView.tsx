@@ -59,8 +59,9 @@ export default function GroupsView({
     try {
       const data = await getAdminGroups({ page, limit, uid, status, search })
       setGroups(data.groups ?? [])
-      setTotal(data.total ?? 0)
-      setTotalPages(data.totalPages ?? 1)
+      const count = data.count ?? data.total ?? 0
+      setTotal(count)
+      setTotalPages(Math.max(1, Math.ceil(count / (limit || 20))))
     } catch (e) {
       const msg = (e as Error)?.message || 'Failed to fetch groups'
       setError(msg)

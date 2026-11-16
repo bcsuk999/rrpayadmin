@@ -44,6 +44,7 @@ export interface AdminResponse {
   msg?: string
   token?: string
   admin?: Record<string, unknown>
+  count?: number
   page?: number
   limit?: number
   total?: number
@@ -67,11 +68,15 @@ export interface AdminGroup {
 export async function adminRegister(
   mobile: string,
   password: string,
+  role?: string,
 ) {
-  return request('/admin/auth/register', {
+  const body: Record<string, unknown> = { mobile, password }
+  if (role) body.role = role
+  const data = await request('/admin/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ mobile, password }),
+    body: JSON.stringify(body),
   })
+  return data as AdminResponse & { group?: AdminGroup }
 }
 
 export async function adminLogin(mobile: string, password: string) {
