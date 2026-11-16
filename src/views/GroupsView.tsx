@@ -66,12 +66,14 @@ export default function GroupsView({
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
 
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogGroup, setDialogGroup] = useState<AdminGroup | null>(null)
-  const [updateStatus, setUpdateStatus] = useState('active')
-  const [updateRemark, setUpdateRemark] = useState('')
-  const [updateExchangeRate, setUpdateExchangeRate] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [statusDialogGroup, setStatusDialogGroup] = useState<AdminGroup | null>(null)
+  const [statusValue, setStatusValue] = useState('active')
+  const [statusRemark, setStatusRemark] = useState('')
+  const [statusSaving, setStatusSaving] = useState(false)
+
+  const [rateDialogGroup, setRateDialogGroup] = useState<AdminGroup | null>(null)
+  const [rateValue, setRateValue] = useState('')
+  const [rateSaving, setRateSaving] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -133,46 +135,72 @@ export default function GroupsView({
     setRefreshKey((k) => k + 1)
   }
 
-  const openDialog = (group: AdminGroup) => {
-    setDialogGroup(group)
-    setUpdateStatus(group.status || 'active')
-    setUpdateRemark(group.remark || '')
-    setUpdateExchangeRate(formatDecimal(group.exchangeRate))
-    setDialogOpen(true)
+  const openStatusDialog = (group: AdminGroup) => {
+    setStatusDialogGroup(group)
+    setStatusValue(group.status || 'active')
+    setStatusRemark('')
   }
 
-  const closeDialog = () => {
-    if (saving) return
-    setDialogOpen(false)
-    setDialogGroup(null)
+  const closeStatusDialog = () => {
+    if (statusSaving) return
+    setStatusDialogGroup(null)
   }
 
-  const handleUpdate = async () => {
-    if (!dialogGroup) return
-    if (updateStatus && updateStatus !== dialogGroup.status && !updateRemark.trim()) {
+  const openRateDialog = (group: AdminGroup) => {
+    setRateDialogGroup(group)
+    setRateValue(formatDecimal(group.exchangeRate))
+  }
+
+  const closeRateDialog = () => {
+    if (rateSaving) return
+    setRateDialogGroup(null)
+  }
+
+  const handleStatusUpdate = async () => {
+    if (!statusDialogGroup) return
+    if (statusValue && statusValue !== statusDialogGroup.status && !statusRemark.trim()) {
       addToast('Remark is required when changing status.', 'error')
       return
     }
-    const body: Record<string, unknown> = {
-      status: updateStatus,
-      remark: updateRemark,
-    }
-    if (updateExchangeRate.trim() !== '') {
-      const rate = Number(updateExchangeRate)
-      if (!Number.isNaN(rate)) body.exchangeRate = rate
-    }
-    setSaving(true)
+    setStatusSaving(true)
     try {
-      const data = await updateAdminGroup(dialogGroup._id, body)
-      addToast((data.msg as string) || 'Group updated', 'success')
-      setDialogOpen(false)
-      setDialogGroup(null)
+      const data = await updateAdminGroup(statusDialogGroup._id, {
+        status: statusValue,
+        remark: statusRemark,
+      })
+      addToast((data.msg as string) || 'Group status updated', 'success')
+      setStatusDialogGroup(null)
       setRefreshKey((k) => k + 1)
     } catch (e) {
-      const msg = (e as Error)?.message || 'Failed to update group'
+      const msg = (e as Error)?.message || 'Failed to update group status'
       addToast(msg, 'error')
     } finally {
-      setSaving(false)
+      setStatusSaving(false)
+    }
+  }
+
+  const handleRateUpdate = async () => {
+    if (!rateDialogGroup) return
+    if (rateValue.trim() === '') {
+      addToast('Exchange rate is required.', 'error')
+      return
+    }
+    const rate = Number(rateValue)
+    if (Number.isNaN(rate)) {
+      addToast('Please enter a valid exchange rate.', 'error')
+      return
+    }
+    setRateSaving(true)
+    try {
+      const data = await updateAdminGroup(rateDialogGroup._id, { exchangeRate: rate })
+      addToast((data.msg as string) || 'Exchange rate updated', 'success')
+      setRateDialogGroup(null)
+      setRefreshKey((k) => k + 1)
+    } catch (e) {
+      const msg = (e as Error)?.message || 'Failed to update exchange rate'
+      addToast(msg, 'error')
+    } finally {
+      setRateSaving(false)
     }
   }
 
@@ -293,9 +321,14 @@ export default function GroupsView({
                     </td>
                     <td className="mono">
                       {formatDecimal(group.exchangeRate) ? (
-                        formatDecimal(group.exchangeRate)
+                        <div className="flex items-center justify-center gap-2">
+                          <span>{formatDecimal(group.exchangeRate)}</span>
+                          <Button variant="ghost" size="sm" onClick={() => openRateDialog(group)}>
+                            Edit
+                          </Button>
+                        </div>
                       ) : (
-                        <Button variant="primary" size="sm" onClick={() => openDialog(group)}>
+                        <Button variant="primary" size="sm" onClick={() => openRateDialog(group)}>
                           Set
                         </Button>
                       )}
@@ -304,7 +337,7 @@ export default function GroupsView({
                     <td className="muted">{group.remark || '—'}</td>
                     <td>
                       <div className="cell-actions flex gap-2">
-                        <Button variant="warning" size="sm" onClick={() => openDialog(group)}>
+                        <Button variant="warning" size="sm" onClick={() => openStatusDialog(group)}>
                           Change Status
                         </Button>
                       </div>
@@ -332,29 +365,29 @@ export default function GroupsView({
         </>
       </TableCard>
 
-      {dialogOpen && dialogGroup && (
+      {statusDialogGroup && (
         <div
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-[rgba(15,18,24,0.5)] p-4"
           onClick={(e) => {
-            if (e.target === e.currentTarget) closeDialog()
+            if (e.target === e.currentTarget) closeStatusDialog()
           }}
         >
           <div
             className="w-full max-w-[420px] rounded-md border border-card-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.1)]"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="group-update-title"
+            aria-labelledby="group-status-title"
           >
             <div className="flex items-center justify-between gap-3 border-b border-card-border px-4 py-3.5">
-              <h3 id="group-update-title" className="text-base font-semibold text-ink">
-                Update Group — {dialogGroup.groupName || dialogGroup.uid}
+              <h3 id="group-status-title" className="text-base font-semibold text-ink">
+                Change Status — {statusDialogGroup.groupName || statusDialogGroup.uid}
               </h3>
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded border border-btn-border bg-page text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand"
                 aria-label="Close"
-                onClick={closeDialog}
-                disabled={saving}
+                onClick={closeStatusDialog}
+                disabled={statusSaving}
               >
                 ×
               </button>
@@ -363,8 +396,8 @@ export default function GroupsView({
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] text-btn-ghost">Status</label>
                 <SelectDropdown
-                  value={updateStatus}
-                  onChange={(v) => setUpdateStatus(String(v))}
+                  value={statusValue}
+                  onChange={(v) => setStatusValue(String(v))}
                   options={[
                     { value: 'active', label: 'Active' },
                     { value: 'suspended', label: 'Suspended' },
@@ -373,28 +406,71 @@ export default function GroupsView({
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[13px] text-btn-ghost">Remark {updateStatus !== dialogGroup.status ? '(required)' : ''}</label>
+                <label className="text-[13px] text-btn-ghost">
+                  Remark {statusValue !== statusDialogGroup.status ? '(required)' : ''}
+                </label>
                 <Input
                   placeholder="Reason / remark"
-                  value={updateRemark}
-                  onChange={(e) => setUpdateRemark(e.target.value)}
+                  value={statusRemark}
+                  onChange={(e) => setStatusRemark(e.target.value)}
                 />
               </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-card-border px-4 py-3.5">
+              <Button variant="ghost" size="sm" onClick={closeStatusDialog} disabled={statusSaving}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm" loading={statusSaving} onClick={handleStatusUpdate}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {rateDialogGroup && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-[rgba(15,18,24,0.5)] p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeRateDialog()
+          }}
+        >
+          <div
+            className="w-full max-w-[420px] rounded-md border border-card-border bg-white shadow-[0_2px_12px_rgba(0,0,0,0.1)]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="group-rate-title"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-card-border px-4 py-3.5">
+              <h3 id="group-rate-title" className="text-base font-semibold text-ink">
+                {formatDecimal(rateDialogGroup.exchangeRate) ? 'Edit' : 'Set'} Exchange Rate — {rateDialogGroup.groupName || rateDialogGroup.uid}
+              </h3>
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded border border-btn-border bg-page text-ink-soft hover:border-brand-soft-border hover:bg-brand-soft hover:text-brand"
+                aria-label="Close"
+                onClick={closeRateDialog}
+                disabled={rateSaving}
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex flex-col gap-3 px-4 py-4">
               <div className="flex flex-col gap-1">
                 <label className="text-[13px] text-btn-ghost">Exchange rate</label>
                 <Input
                   placeholder="Exchange rate"
                   inputMode="decimal"
-                  value={updateExchangeRate}
-                  onChange={(e) => setUpdateExchangeRate(e.target.value)}
+                  value={rateValue}
+                  onChange={(e) => setRateValue(e.target.value)}
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t border-card-border px-4 py-3.5">
-              <Button variant="ghost" size="sm" onClick={closeDialog} disabled={saving}>
+              <Button variant="ghost" size="sm" onClick={closeRateDialog} disabled={rateSaving}>
                 Cancel
               </Button>
-              <Button variant="primary" size="sm" loading={saving} onClick={handleUpdate}>
+              <Button variant="primary" size="sm" loading={rateSaving} onClick={handleRateUpdate}>
                 Save
               </Button>
             </div>
