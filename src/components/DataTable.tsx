@@ -18,7 +18,7 @@ export default function DataTable({
   return (
     <div
       className={[
-        'admin-table-scroll overflow-auto rounded-[10px] border border-[#ebeef5]',
+        'admin-table-scroll min-h-[320px] overflow-auto rounded-[10px] border border-[#ebeef5]',
         className,
       ].join(' ')}
     >
