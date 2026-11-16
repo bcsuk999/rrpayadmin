@@ -10,6 +10,62 @@ export class ApiError extends Error {
   }
 }
 
+export interface PublicIpResponse {
+  success: boolean
+  ipv4: string | null
+  ipv6: string | null
+  errors?: Record<string, string>
+}
+
+export async function getPublicIp(): Promise<PublicIpResponse> {
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE_URL}/ip`)
+  } catch {
+    throw new ApiError('Cannot reach the server. Please try again.', 0)
+  }
+
+  let data: unknown
+  try {
+    data = await res.json()
+  } catch {
+    throw new ApiError(`Invalid IP lookup response (${res.status})`, res.status)
+  }
+
+  if ((!res.ok && res.status !== 502) || !data || typeof data !== 'object') {
+    const body = data as Record<string, unknown> | null
+    const message = typeof body?.error === 'string' ? body.error : `Request failed (${res.status})`
+    throw new ApiError(message, res.status)
+  }
+
+  const result = data as Record<string, unknown>
+  if (
+    typeof result.success !== 'boolean' ||
+    (result.ipv4 !== null && typeof result.ipv4 !== 'string') ||
+    (result.ipv6 !== null && typeof result.ipv6 !== 'string')
+  ) {
+    throw new ApiError('Invalid IP lookup response', res.status)
+  }
+
+  const errors = result.errors
+  if (
+    errors !== undefined &&
+    (!errors ||
+      typeof errors !== 'object' ||
+      Array.isArray(errors) ||
+      Object.values(errors).some((message) => typeof message !== 'string'))
+  ) {
+    throw new ApiError('Invalid IP lookup errors', res.status)
+  }
+
+  return {
+    success: result.success,
+    ipv4: result.ipv4,
+    ipv6: result.ipv6,
+    ...(errors ? { errors: errors as Record<string, string> } : {}),
+  }
+}
+
 async function request(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -91,7 +147,7 @@ export interface GroupFilters {
   page?: number
   limit?: number
   uid?: string
-  groupId?: number
+  groupId?: number | string
   status?: string
   search?: string
 }

@@ -3,6 +3,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { getPublicIp, type PublicIpResponse } from '../api/client'
 
 export interface HeaderProps {
   collapsed?: boolean
@@ -56,10 +57,26 @@ export default function Header({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [logoutOpen, setLogoutOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [publicIp, setPublicIp] = useState<PublicIpResponse | null>(null)
+  const [publicIpError, setPublicIpError] = useState<string | null>(null)
   const settingsWrapRef = useRef<HTMLDivElement>(null)
   const logoutWrapRef = useRef<HTMLDivElement>(null)
 
   const resolvedTitle = titleMap[pageTitle.toLowerCase()] ?? pageTitle
+
+  useEffect(() => {
+    let active = true
+    getPublicIp()
+      .then((result) => {
+        if (active) setPublicIp(result)
+      })
+      .catch((error: unknown) => {
+        if (active) setPublicIpError(error instanceof Error ? error.message : 'IP lookup failed')
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const toggleFullscreen = () => {
     const doc = document as Document & {
@@ -189,6 +206,35 @@ export default function Header({
       </div>
 
       <div className="header-right flex items-center gap-3 h-full mr-6 max-[600px]:gap-2 max-[600px]:mr-2">
+        <div
+          className="header-public-ips flex min-w-0 max-w-[35vw] items-center gap-2 text-[11px] text-white/85"
+          role="status"
+          aria-label={
+            publicIp
+              ? `Public egress IPs. IPv4: ${publicIp.ipv4 ?? 'unavailable'}. IPv6: ${publicIp.ipv6 ?? 'unavailable'}.`
+              : publicIpError
+                ? `Public egress IP lookup failed: ${publicIpError}`
+                : 'Loading public egress IP addresses'
+          }
+          title={
+            publicIp
+              ? [
+                  `IPv4: ${publicIp.ipv4 ?? 'unavailable'}`,
+                  `IPv6: ${publicIp.ipv6 ?? 'unavailable'}`,
+                  ...Object.entries(publicIp.errors ?? {}).map(([family, message]) => `${family}: ${message}`),
+                ].join('\n')
+              : publicIpError ?? 'Loading public egress IP addresses'
+          }
+        >
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="shrink-0">v4</span>
+            <span className="truncate">{publicIp?.ipv4 ?? (publicIpError || publicIp ? 'unavailable' : '…')}</span>
+          </span>
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="shrink-0">v6</span>
+            <span className="truncate">{publicIp?.ipv6 ?? (publicIpError || publicIp ? 'unavailable' : '…')}</span>
+          </span>
+        </div>
         <div ref={settingsWrapRef} className="settings-dropdown relative inline-flex">
           <button
             type="button"

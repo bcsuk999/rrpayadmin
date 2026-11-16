@@ -3,7 +3,6 @@ import Button from '../components/Button'
 import DataTable from '../components/DataTable'
 import FilterCard from '../components/FilterCard'
 import Input from '../components/Input'
-import SelectDropdown from '../components/SelectDropdown'
 import TableCard from '../components/TableCard'
 import TableCardHeading from '../components/TableCardHeading'
 import TableFooter from '../components/TableFooter'
@@ -32,14 +31,6 @@ export interface PayinsViewProps {
   onLimitChange?: (limit: number) => void
 }
 
-const statusOptions = [
-  { value: '', label: 'All statuses' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'success', label: 'Success' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'expired', label: 'Expired' },
-]
-
 function fmtDate(value?: string | null) {
   if (!value) return '—'
   const d = new Date(value)
@@ -66,31 +57,16 @@ export default function PayinsView({
   const page = controlledPage ?? internalPage
   const limit = controlledLimit ?? internalLimit
 
-  const [qInput, setQInput] = useState('')
   const [uidInput, setUidInput] = useState('')
   const [groupIdInput, setGroupIdInput] = useState('')
-  const [statusInput, setStatusInput] = useState('')
   const [outTradeNoInput, setOutTradeNoInput] = useState('')
   const [payOrderNoInput, setPayOrderNoInput] = useState('')
-  const [upiInput, setUpiInput] = useState('')
-  const [amountInput, setAmountInput] = useState('')
-  const [createdFromInput, setCreatedFromInput] = useState('')
-  const [createdToInput, setCreatedToInput] = useState('')
-  const [lastActiveFilter, setLastActiveFilter] = useState<
-    'q' | 'uid' | 'groupId' | 'status' | 'outTradeNo' | 'payOrderNo' | 'upi' | 'amount' | 'createdFrom' | 'createdTo' | ''
-  >('')
 
   const [appliedFilters, setAppliedFilters] = useState({
-    q: '',
     uid: '',
     groupId: '',
-    status: '',
     outTradeNo: '',
     payOrderNo: '',
-    upi: '',
-    amount: '',
-    createdFrom: '',
-    createdTo: '',
   })
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -112,16 +88,10 @@ export default function PayinsView({
         const data = await getAdminPayins({
           page,
           limit,
-          q: appliedFilters.q || undefined,
           uid: appliedFilters.uid || undefined,
           groupId: appliedFilters.groupId || undefined,
-          status: appliedFilters.status || undefined,
           outTradeNo: appliedFilters.outTradeNo || undefined,
           payOrderNo: appliedFilters.payOrderNo || undefined,
-          upi: appliedFilters.upi || undefined,
-          amount: appliedFilters.amount || undefined,
-          createdFrom: appliedFilters.createdFrom || undefined,
-          createdTo: appliedFilters.createdTo || undefined,
         })
         if (cancelled) return
         setPayins(data.payins ?? [])
@@ -152,73 +122,25 @@ export default function PayinsView({
 
   const handleSearch = () => {
     setPage(1)
-    const values = {
-      q: qInput.trim(),
+    setAppliedFilters({
       uid: uidInput.trim(),
       groupId: groupIdInput.trim(),
-      status: statusInput,
       outTradeNo: outTradeNoInput.trim(),
       payOrderNo: payOrderNoInput.trim(),
-      upi: upiInput.trim(),
-      amount: amountInput.trim(),
-      createdFrom: createdFromInput,
-      createdTo: createdToInput,
-    }
-    const empty = {
-      q: '',
-      uid: '',
-      groupId: '',
-      status: '',
-      outTradeNo: '',
-      payOrderNo: '',
-      upi: '',
-      amount: '',
-      createdFrom: '',
-      createdTo: '',
-    }
-    const key = lastActiveFilter
-    if (key) {
-      const next = { ...empty, [key]: values[key] }
-      setQInput(key === 'q' ? values.q : '')
-      setUidInput(key === 'uid' ? values.uid : '')
-      setGroupIdInput(key === 'groupId' ? values.groupId : '')
-      setStatusInput(key === 'status' ? values.status : '')
-      setOutTradeNoInput(key === 'outTradeNo' ? values.outTradeNo : '')
-      setPayOrderNoInput(key === 'payOrderNo' ? values.payOrderNo : '')
-      setUpiInput(key === 'upi' ? values.upi : '')
-      setAmountInput(key === 'amount' ? values.amount : '')
-      setCreatedFromInput(key === 'createdFrom' ? values.createdFrom : '')
-      setCreatedToInput(key === 'createdTo' ? values.createdTo : '')
-      setAppliedFilters(next)
-      return
-    }
-    setAppliedFilters(values)
+    })
   }
 
   const handleReset = () => {
-    setQInput('')
     setUidInput('')
     setGroupIdInput('')
-    setStatusInput('')
     setOutTradeNoInput('')
     setPayOrderNoInput('')
-    setUpiInput('')
-    setAmountInput('')
-    setCreatedFromInput('')
-    setCreatedToInput('')
-    setLastActiveFilter('')
     setPage(1)
     setAppliedFilters({
-      q: '',
       uid: '',
       groupId: '',
-      status: '',
       outTradeNo: '',
       payOrderNo: '',
-      upi: '',
-      amount: '',
-      createdFrom: '',
-      createdTo: '',
     })
   }
 
@@ -243,28 +165,11 @@ export default function PayinsView({
     <div className="flex flex-col gap-4">
       <FilterCard title="Filters" open collapsible={false}>
         <div className="flex flex-wrap items-end gap-2.5">
-          <div className="flex min-w-[220px] flex-1 flex-col gap-1">
-            <label className="text-sm text-btn-ghost">Search</label>
-            <Input
-              placeholder="payOrderNo, outTradeNo, uid, upi, utr, merNo…"
-              value={qInput}
-              onChange={(e) => {
-                setQInput(e.target.value)
-                setLastActiveFilter('q')
-              }}
-              onFocus={() => setLastActiveFilter('q')}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
           <div className="flex w-[150px] flex-col gap-1 max-sm:w-full">
             <label className="text-sm text-btn-ghost">UID</label>
             <Input
               value={uidInput}
-              onChange={(e) => {
-                setUidInput(e.target.value)
-                setLastActiveFilter('uid')
-              }}
-              onFocus={() => setLastActiveFilter('uid')}
+              onChange={(e) => setUidInput(e.target.value)}
               placeholder="UID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -273,100 +178,27 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Group ID</label>
             <Input
               value={groupIdInput}
-              onChange={(e) => {
-                setGroupIdInput(e.target.value)
-                setLastActiveFilter('groupId')
-              }}
-              onFocus={() => setLastActiveFilter('groupId')}
+              onChange={(e) => setGroupIdInput(e.target.value)}
               placeholder="Group ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <div className="flex w-[160px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Status</label>
-            <SelectDropdown
-              value={statusInput}
-              onChange={(v) => {
-                setStatusInput(String(v))
-                setLastActiveFilter('status')
-              }}
-              options={statusOptions}
-            />
-          </div>
           <div className="flex w-[190px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Pay Order No</label>
+            <label className="text-sm text-btn-ghost">Order ID</label>
             <Input
               value={payOrderNoInput}
-              onChange={(e) => {
-                setPayOrderNoInput(e.target.value)
-                setLastActiveFilter('payOrderNo')
-              }}
-              onFocus={() => setLastActiveFilter('payOrderNo')}
-              placeholder="PO..."
+              onChange={(e) => setPayOrderNoInput(e.target.value)}
+              placeholder="Order ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
           <div className="flex w-[190px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Out Trade No</label>
+            <label className="text-sm text-btn-ghost">Mer Order ID</label>
             <Input
               value={outTradeNoInput}
-              onChange={(e) => {
-                setOutTradeNoInput(e.target.value)
-                setLastActiveFilter('outTradeNo')
-              }}
-              onFocus={() => setLastActiveFilter('outTradeNo')}
-              placeholder="Out trade no"
+              onChange={(e) => setOutTradeNoInput(e.target.value)}
+              placeholder="Mer Order ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          <div className="flex w-[180px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">UPI / VPA</label>
-            <Input
-              value={upiInput}
-              onChange={(e) => {
-                setUpiInput(e.target.value)
-                setLastActiveFilter('upi')
-              }}
-              onFocus={() => setLastActiveFilter('upi')}
-              placeholder="merchant@bank"
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          <div className="flex w-[140px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Amount</label>
-            <Input
-              value={amountInput}
-              onChange={(e) => {
-                setAmountInput(e.target.value)
-                setLastActiveFilter('amount')
-              }}
-              onFocus={() => setLastActiveFilter('amount')}
-              placeholder="100.00"
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          <div className="flex w-[170px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Created from</label>
-            <Input
-              type="date"
-              value={createdFromInput}
-              onChange={(e) => {
-                setCreatedFromInput(e.target.value)
-                setLastActiveFilter('createdFrom')
-              }}
-              onFocus={() => setLastActiveFilter('createdFrom')}
-            />
-          </div>
-          <div className="flex w-[170px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Created to</label>
-            <Input
-              type="date"
-              value={createdToInput}
-              onChange={(e) => {
-                setCreatedToInput(e.target.value)
-                setLastActiveFilter('createdTo')
-              }}
-              onFocus={() => setLastActiveFilter('createdTo')}
             />
           </div>
           <div className="flex items-center gap-2.5 pb-[1px]">

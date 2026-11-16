@@ -32,13 +32,6 @@ export interface GroupsViewProps {
   onLimitChange?: (limit: number) => void
 }
 
-const statusOptions = [
-  { value: '', label: 'All statuses' },
-  { value: 'active', label: 'Active' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'banned', label: 'Banned' },
-]
-
 export default function GroupsView({
   page: controlledPage,
   limit: controlledLimit,
@@ -51,13 +44,11 @@ export default function GroupsView({
   const page = controlledPage ?? internalPage
   const limit = controlledLimit ?? internalLimit
 
-  const [searchInput, setSearchInput] = useState('')
   const [uidInput, setUidInput] = useState('')
-  const [statusInput, setStatusInput] = useState('')
+  const [groupIdInput, setGroupIdInput] = useState('')
   const [appliedFilters, setAppliedFilters] = useState({
-    search: '',
     uid: '',
-    status: '',
+    groupId: '',
   })
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -84,8 +75,7 @@ export default function GroupsView({
           page,
           limit,
           uid: appliedFilters.uid,
-          status: appliedFilters.status,
-          search: appliedFilters.search,
+          groupId: appliedFilters.groupId,
         })
         if (cancelled) return
         setGroups(data.groups ?? [])
@@ -117,18 +107,16 @@ export default function GroupsView({
   const handleSearch = () => {
     setPage(1)
     setAppliedFilters({
-      search: searchInput,
-      uid: uidInput,
-      status: statusInput,
+      uid: uidInput.trim(),
+      groupId: groupIdInput.trim(),
     })
   }
 
   const handleReset = () => {
-    setSearchInput('')
     setUidInput('')
-    setStatusInput('')
+    setGroupIdInput('')
     setPage(1)
-    setAppliedFilters({ search: '', uid: '', status: '' })
+    setAppliedFilters({ uid: '', groupId: '' })
   }
 
   const handleRefresh = () => {
@@ -209,22 +197,6 @@ export default function GroupsView({
       <FilterCard title="Filters" open collapsible={false}>
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center">
-            <label htmlFor="groups-search" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
-              Search
-            </label>
-            <div className="w-[220px] max-sm:w-full">
-              <Input
-                id="groups-search"
-                placeholder="Search by uid, groupName or groupId"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSearch()
-                }}
-              />
-            </div>
-          </div>
-          <div className="flex items-center">
             <label htmlFor="groups-uid" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
               UID
             </label>
@@ -243,17 +215,18 @@ export default function GroupsView({
             </div>
           </div>
           <div className="flex items-center">
-            <label htmlFor="groups-status" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
-              Status
+            <label htmlFor="groups-group-id" className="pr-3 text-sm whitespace-nowrap text-btn-ghost max-sm:pb-1.5 max-sm:pr-0">
+              Group ID
             </label>
-            <div className="w-[160px] max-sm:w-full">
-              <SelectDropdown
-                id="groups-status"
-                value={statusInput}
-                onChange={(v) => {
-                  setStatusInput(String(v))
+            <div className="w-[150px] max-sm:w-full">
+              <Input
+                id="groups-group-id"
+                placeholder="Please enter Group ID"
+                value={groupIdInput}
+                onChange={(e) => setGroupIdInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearch()
                 }}
-                options={statusOptions}
               />
             </div>
           </div>

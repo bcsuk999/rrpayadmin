@@ -207,8 +207,8 @@ children flyouts, mobile drawer at ≤880px, amber active state.
 ### Header — `src/components/Header.tsx`
 
 50px navy sticky bar: desktop collapse toggle, mobile menu toggle, breadcrumb
-(Home / page), settings dropdown (View tags / Static cards), account dropdown
-(Logout) and fullscreen toggle.
+(Home / page), public egress IPv4/IPv6 status, settings dropdown (View tags /
+Static cards), account dropdown (Logout) and fullscreen toggle.
 
 | Prop               | Type                      | Default     |
 | ------------------ | ------------------------- | ----------- |
