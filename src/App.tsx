@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar'
 import TagsView from './components/TagsView'
 import ToastContainer, { useToast } from './components/Toast'
 import GroupsView from './views/GroupsView'
+import PayinsView from './views/PayinsView'
 import { adminLogin } from './api/client'
 import { clearSession, getStoredUser, isAuthenticated, setSession } from './auth'
 
@@ -21,6 +22,8 @@ function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [groupsPage, setGroupsPage] = useState(1)
   const [groupsLimit, setGroupsLimit] = useState(20)
+  const [payinsPage, setPayinsPage] = useState(1)
+  const [payinsLimit, setPayinsLimit] = useState(20)
 
   const handleLogin = async (mobile: string, password: string) => {
     setLoginLoading(true)
@@ -61,6 +64,7 @@ function App() {
   const pageTitles: Record<string, string> = {
     '/': 'Dashboard',
     '/groups': 'Groups',
+    '/payins': 'Payins',
   }
 
   if (!user) {
@@ -110,6 +114,7 @@ function App() {
         currentPath={path}
         items={[
           { key: 'groups', to: '/groups', label: 'Groups' },
+          { key: 'payins', to: '/payins', label: 'Payins' },
         ]}
         brand="RRPAY"
         badge="Admin"
@@ -145,6 +150,13 @@ function App() {
                   limit={groupsLimit}
                   onPageChange={setGroupsPage}
                   onLimitChange={setGroupsLimit}
+                />
+              ) : path === '/payins' ? (
+                <PayinsView
+                  page={payinsPage}
+                  limit={payinsLimit}
+                  onPageChange={setPayinsPage}
+                  onLimitChange={setPayinsLimit}
                 />
               ) : (
                 <section className="admin-card admin-card p-4 text-ink">

@@ -136,3 +136,112 @@ export async function getGroupById(id: string) {
   const data = await request(`/groups/${id}`, { method: 'GET' })
   return data as AdminResponse & { group: AdminGroup }
 }
+
+export interface PayinGroupSummary {
+  _id?: string
+  uid?: string
+  groupId?: number
+  groupName?: string
+  status?: string
+  exchangeRate?: number | null | { $numberDecimal?: string }
+}
+
+export interface AdminPayin {
+  _id: string
+  payOrderNo?: string
+  outTradeNo?: string
+  merNo?: string
+  uid?: string
+  groupId?: number
+  upiId?: string
+  totalAmount?: string
+  deeplinkAmount?: string
+  currencyCode?: string
+  payType?: string
+  status?: string
+  payState?: string | null
+  payURL?: string
+  utrCode?: string | null
+  paidAt?: string | null
+  createdAt?: string
+  updatedAt?: string
+  group?: PayinGroupSummary | null
+  [key: string]: unknown
+}
+
+export interface PayinFilters {
+  q?: string
+  groupId?: number | string
+  orderId?: string
+  payOrderNo?: string
+  outTradeNo?: string
+  uid?: string
+  upi?: string
+  upiId?: string
+  amount?: string
+  status?: string
+  payUrl?: string
+  payURL?: string
+  payState?: string
+  currencyCode?: string
+  payType?: string
+  merNo?: string
+  createdFrom?: string
+  from?: string
+  createdTo?: string
+  to?: string
+  updatedFrom?: string
+  updatedTo?: string
+  page?: number
+  limit?: number
+}
+
+export async function getAdminPayins(params: PayinFilters = {}) {
+  const qs = new URLSearchParams()
+  const set = (key: string, value: unknown) => {
+    if (value === undefined || value === null || value === '') return
+    qs.set(key, String(value))
+  }
+  set('q', params.q)
+  set('groupId', params.groupId)
+  set('orderId', params.orderId ?? params.payOrderNo)
+  set('outTradeNo', params.outTradeNo)
+  set('uid', params.uid)
+  set('upi', params.upi ?? params.upiId)
+  set('amount', params.amount)
+  set('status', params.status)
+  set('payUrl', params.payUrl ?? params.payURL)
+  set('payState', params.payState)
+  set('currencyCode', params.currencyCode)
+  set('payType', params.payType)
+  set('merNo', params.merNo)
+  set('createdFrom', params.createdFrom ?? params.from)
+  set('createdTo', params.createdTo ?? params.to)
+  set('updatedFrom', params.updatedFrom)
+  set('updatedTo', params.updatedTo)
+  set('page', params.page)
+  set('limit', params.limit)
+  const suffix = qs.toString() ? `?${qs.toString()}` : ''
+  const data = await request(`/admin/payins${suffix}`, { method: 'GET' })
+  return data as AdminResponse & {
+    payins: AdminPayin[]
+    page?: number
+    limit?: number
+    total?: number
+    totalPages?: number
+  }
+}
+
+export async function approveAdminPayin(id: string, utrCode?: string) {
+  const body = utrCode ? { utrCode } : {}
+  const data = await request(`/admin/payins/${encodeURIComponent(id)}/approve`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+  return data as AdminResponse & { payin: AdminPayin }
+}
+
+export async function getAdminPayin(id: string) {
+  const data = await request(`/admin/payins/${encodeURIComponent(id)}`, { method: 'GET' })
+  return data as AdminResponse & { payin: AdminPayin }
+}

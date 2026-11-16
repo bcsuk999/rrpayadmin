@@ -175,6 +175,13 @@ function iconFor(key: string): ReactNode {
           <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       )
+    case 'payins':
+    case 'payin':
+      return (
+        <svg viewBox="0 0 24 24" {...common}>
+          <path d="M12 3v18M5 10l7-7 7 7M5 14l7 7 7-7" />
+        </svg>
+      )
     default:
       return (
         <svg viewBox="0 0 24 24" {...common}>
