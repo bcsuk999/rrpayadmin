@@ -10,6 +10,7 @@ import TableCardHeading from '../components/TableCardHeading'
 import TableFooter from '../components/TableFooter'
 import { addToast } from '../components/Toast'
 import { approveAdminPayin, getAdminPayins } from '../api/client'
+import { formatDateTime } from '../utils/date'
 import type { AdminPayin } from '../api/client'
 
 function formatValue(value: unknown): string {
@@ -41,13 +42,6 @@ const statusOptions = [
   { value: 'expired', label: 'Expired' },
 ]
 
-function fmtDate(value?: string | null) {
-  if (!value) return '—'
-  const d = new Date(value)
-  if (Number.isNaN(d.getTime())) return value
-  return d.toLocaleString()
-}
-
 function statusBadgeClass(status?: string) {
   if (status === 'success') return 'badge badge--success'
   if (status === 'failed') return 'badge badge--danger'
@@ -72,8 +66,6 @@ export default function PayinsView({
   const [outTradeNoInput, setOutTradeNoInput] = useState('')
   const [payOrderNoInput, setPayOrderNoInput] = useState('')
   const [statusInput, setStatusInput] = useState('')
-  const [upiInput, setUpiInput] = useState('')
-  const [amountInput, setAmountInput] = useState('')
   const [createdFromInput, setCreatedFromInput] = useState('')
   const [createdToInput, setCreatedToInput] = useState('')
 
@@ -83,11 +75,19 @@ export default function PayinsView({
     outTradeNo: '',
     payOrderNo: '',
     status: '',
-    upi: '',
-    amount: '',
     createdFrom: '',
     createdTo: '',
   })
+  const [lastActiveFilter, setLastActiveFilter] = useState<
+    | 'uid'
+    | 'groupId'
+    | 'outTradeNo'
+    | 'payOrderNo'
+    | 'status'
+    | 'createdFrom'
+    | 'createdTo'
+    | ''
+  >('')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const [payins, setPayins] = useState<AdminPayin[]>([])
@@ -113,8 +113,6 @@ export default function PayinsView({
           outTradeNo: appliedFilters.outTradeNo || undefined,
           payOrderNo: appliedFilters.payOrderNo || undefined,
           status: appliedFilters.status || undefined,
-          upi: appliedFilters.upi || undefined,
-          amount: appliedFilters.amount || undefined,
           createdFrom: appliedFilters.createdFrom || undefined,
           createdTo: appliedFilters.createdTo || undefined,
         })
@@ -147,17 +145,23 @@ export default function PayinsView({
 
   const handleSearch = () => {
     setPage(1)
-    setAppliedFilters({
-      uid: uidInput.trim(),
-      groupId: groupIdInput.trim(),
-      outTradeNo: outTradeNoInput.trim(),
-      payOrderNo: payOrderNoInput.trim(),
-      status: statusInput,
-      upi: upiInput.trim(),
-      amount: amountInput.trim(),
-      createdFrom: createdFromInput,
-      createdTo: createdToInput,
-    })
+    const next = {
+      uid: lastActiveFilter === 'uid' ? uidInput.trim() : '',
+      groupId: lastActiveFilter === 'groupId' ? groupIdInput.trim() : '',
+      outTradeNo: lastActiveFilter === 'outTradeNo' ? outTradeNoInput.trim() : '',
+      payOrderNo: lastActiveFilter === 'payOrderNo' ? payOrderNoInput.trim() : '',
+      status: lastActiveFilter === 'status' ? statusInput : '',
+      createdFrom: lastActiveFilter === 'createdFrom' ? createdFromInput : '',
+      createdTo: lastActiveFilter === 'createdTo' ? createdToInput : '',
+    }
+    setUidInput(next.uid)
+    setGroupIdInput(next.groupId)
+    setOutTradeNoInput(next.outTradeNo)
+    setPayOrderNoInput(next.payOrderNo)
+    setStatusInput(next.status)
+    setCreatedFromInput(next.createdFrom)
+    setCreatedToInput(next.createdTo)
+    setAppliedFilters(next)
   }
 
   const handleReset = () => {
@@ -166,10 +170,9 @@ export default function PayinsView({
     setOutTradeNoInput('')
     setPayOrderNoInput('')
     setStatusInput('')
-    setUpiInput('')
-    setAmountInput('')
     setCreatedFromInput('')
     setCreatedToInput('')
+    setLastActiveFilter('')
     setPage(1)
     setAppliedFilters({
       uid: '',
@@ -177,8 +180,6 @@ export default function PayinsView({
       outTradeNo: '',
       payOrderNo: '',
       status: '',
-      upi: '',
-      amount: '',
       createdFrom: '',
       createdTo: '',
     })
@@ -209,7 +210,10 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">UID</label>
             <Input
               value={uidInput}
-              onChange={(e) => setUidInput(e.target.value)}
+              onChange={(e) => {
+                setUidInput(e.target.value)
+                setLastActiveFilter('uid')
+              }}
               placeholder="UID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -218,7 +222,10 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Group ID</label>
             <Input
               value={groupIdInput}
-              onChange={(e) => setGroupIdInput(e.target.value)}
+              onChange={(e) => {
+                setGroupIdInput(e.target.value)
+                setLastActiveFilter('groupId')
+              }}
               placeholder="Group ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -227,7 +234,10 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Order ID</label>
             <Input
               value={payOrderNoInput}
-              onChange={(e) => setPayOrderNoInput(e.target.value)}
+              onChange={(e) => {
+                setPayOrderNoInput(e.target.value)
+                setLastActiveFilter('payOrderNo')
+              }}
               placeholder="Order ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -236,7 +246,10 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Mer Order ID</label>
             <Input
               value={outTradeNoInput}
-              onChange={(e) => setOutTradeNoInput(e.target.value)}
+              onChange={(e) => {
+                setOutTradeNoInput(e.target.value)
+                setLastActiveFilter('outTradeNo')
+              }}
               placeholder="Mer Order ID"
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
@@ -245,33 +258,21 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Status</label>
             <SelectDropdown
               value={statusInput}
-              onChange={(v) => setStatusInput(String(v))}
+              onChange={(v) => {
+                setStatusInput(String(v))
+                setLastActiveFilter('status')
+              }}
               options={statusOptions}
-            />
-          </div>
-          <div className="flex w-[180px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">UPI / VPA</label>
-            <Input
-              value={upiInput}
-              onChange={(e) => setUpiInput(e.target.value)}
-              placeholder="merchant@bank"
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
-          <div className="flex w-[140px] flex-col gap-1 max-sm:w-full">
-            <label className="text-sm text-btn-ghost">Amount</label>
-            <Input
-              value={amountInput}
-              onChange={(e) => setAmountInput(e.target.value)}
-              placeholder="100.00"
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
           <div className="flex w-[220px] flex-col gap-1 max-sm:w-full">
             <label className="text-sm text-btn-ghost">Created from</label>
             <DatePicker
               value={createdFromInput}
-              onChange={setCreatedFromInput}
+              onChange={(value) => {
+                setCreatedFromInput(value)
+                setLastActiveFilter('createdFrom')
+              }}
               placeholder="Created from"
             />
           </div>
@@ -279,7 +280,10 @@ export default function PayinsView({
             <label className="text-sm text-btn-ghost">Created to</label>
             <DatePicker
               value={createdToInput}
-              onChange={setCreatedToInput}
+              onChange={(value) => {
+                setCreatedToInput(value)
+                setLastActiveFilter('createdTo')
+              }}
               placeholder="Created to"
             />
           </div>
@@ -300,21 +304,22 @@ export default function PayinsView({
           <DataTable wide loading={loading}>
             <thead>
               <tr>
-                <th>Pay Order No</th>
-                <th>Out Trade No</th>
+                <th>Order ID</th>
+                <th>Mer Order ID</th>
                 <th>UID / Group</th>
                 <th>Amount</th>
                 <th>UPI</th>
                 <th>Status</th>
                 <th>UTR</th>
                 <th>Created</th>
+                <th>Updated At</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {payins.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center text-sm">
+                  <td colSpan={10} className="text-center text-sm">
                     No payins found. Try different filters.
                   </td>
                 </tr>
@@ -340,7 +345,8 @@ export default function PayinsView({
                       {p.payState ? <div className="muted mt-1 text-[11px]">{formatValue(p.payState)}</div> : null}
                     </td>
                     <td className="mono">{formatValue(p.utrCode)}</td>
-                    <td className="muted text-[12px]">{fmtDate(p.createdAt)}</td>
+                    <td className="muted text-[12px]">{formatDateTime(p.createdAt)}</td>
+                    <td className="muted text-[12px]">{formatDateTime(p.updatedAt)}</td>
                     <td>
                       <div className="cell-actions flex flex-wrap gap-2">
                         <Button variant="ghost" size="sm" onClick={() => setViewPayin(p)}>View</Button>
@@ -368,6 +374,7 @@ export default function PayinsView({
             totalPages={totalPages}
             total={total}
             pageSize={limit}
+            pageSizes={[10, 20, 50, 100, 200]}
             disabled={loading}
             onChange={setPage}
             onSizeChange={(next) => {
@@ -404,9 +411,9 @@ export default function PayinsView({
                 ['Pay URL', viewPayin.payURL],
                 ['Mer No', viewPayin.merNo],
                 ['Pay Type', viewPayin.payType],
-                ['Created', fmtDate(viewPayin.createdAt)],
-                ['Updated', fmtDate(viewPayin.updatedAt)],
-                ['Paid At', fmtDate(viewPayin.paidAt as string | null | undefined)],
+                ['Created', formatDateTime(viewPayin.createdAt)],
+                ['Updated', formatDateTime(viewPayin.updatedAt)],
+                ['Paid At', formatDateTime(viewPayin.paidAt)],
               ].map(([label, value]) => (
                 <div key={String(label)} className="flex flex-col gap-0.5 rounded border border-card-border bg-page/40 p-2">
                   <span className="text-[12px] text-ink-soft">{label}</span>

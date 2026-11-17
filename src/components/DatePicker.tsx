@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { formatDateTime } from '../utils/date'
 
 export interface DatePickerProps {
   /** Selected date as `YYYY-MM-DD` (time suffix is ignored). */
@@ -47,11 +48,6 @@ function startOfMonth(date: Date) {
 
 function addMonths(date: Date, count: number) {
   return new Date(date.getFullYear(), date.getMonth() + count, 1)
-}
-
-function datePart(value?: string) {
-  const match = String(value ?? '').match(/^(\d{4}-\d{2}-\d{2})/)
-  return match ? match[1] : ''
 }
 
 function parseDate(value?: string) {
@@ -139,7 +135,7 @@ function DatePicker({
   const panelId = useId()
 
   const selected = parseDate(value)
-  const display = datePart(value)
+  const display = selected ? formatDateTime(selected) : ''
   const weeks = useMemo(() => chunk(buildCells(viewMonth)), [viewMonth])
 
   useLayoutEffect(() => {

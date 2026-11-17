@@ -3,10 +3,12 @@ import { API_BASE_URL } from '../config'
 
 export class ApiError extends Error {
   status: number
+  data?: Record<string, unknown>
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, data?: Record<string, unknown>) {
     super(message)
     this.status = status
+    this.data = data
   }
 }
 
@@ -90,7 +92,7 @@ async function request(path: string, options: RequestInit = {}) {
     }
     const message =
       (data.error as string) || (data.msg as string) || `Request failed (${res.status})`
-    throw new ApiError(message, res.status)
+    throw new ApiError(message, res.status, data)
   }
   return data as AdminResponse
 }
@@ -105,6 +107,7 @@ export interface AdminResponse {
   limit?: number
   total?: number
   totalPages?: number
+  hasMore?: boolean
   groups?: AdminGroup[]
 }
 
@@ -119,6 +122,32 @@ export interface AdminGroup {
   balance: string
   createdAt?: string
   updatedAt?: string
+}
+
+export interface AdminGateway {
+  _id: string
+  name: string
+  payType: string
+  config: Record<string, unknown>
+  status: 'active' | 'inactive'
+  createdAt: string
+  updatedAt: string
+}
+
+export async function getAdminGateways() {
+  const data = await request('/admin/gateways', { method: 'GET' })
+  return data as AdminResponse & { gateways: AdminGateway[] }
+}
+
+export async function updateAdminGateway(
+  id: string,
+  updates: Partial<Pick<AdminGateway, 'status' | 'payType'>>,
+) {
+  const data = await request(`/admin/gateways/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(updates),
+  })
+  return data as AdminResponse & { gateway: AdminGateway }
 }
 
 export async function adminRegister(
@@ -149,15 +178,19 @@ export interface GroupFilters {
   uid?: string
   groupId?: number | string
   status?: string
-  search?: string
+  includeTotal?: boolean
 }
 
 export async function getAdminGroups(params: GroupFilters = {}) {
   const qs = new URLSearchParams()
   if (params.uid) qs.set('uid', params.uid)
-  if (params.groupId) qs.set('groupId', String(params.groupId))
+  if (params.groupId !== undefined && params.groupId !== '') {
+    qs.set('groupId', String(params.groupId))
+  }
   if (params.status) qs.set('status', params.status)
-  if (params.search) qs.set('search', params.search)
+  if (params.includeTotal !== undefined) {
+    qs.set('includeTotal', String(params.includeTotal))
+  }
   if (params.page) qs.set('page', String(params.page))
   if (params.limit) qs.set('limit', String(params.limit))
   const suffix = qs.toString() ? `?${qs.toString()}` : ''
@@ -226,18 +259,13 @@ export interface AdminPayin {
 }
 
 export interface PayinFilters {
-  q?: string
   groupId?: number | string
   orderId?: string
   payOrderNo?: string
   outTradeNo?: string
   uid?: string
-  upi?: string
-  upiId?: string
   amount?: string
   status?: string
-  payUrl?: string
-  payURL?: string
   payState?: string
   currencyCode?: string
   payType?: string
@@ -248,6 +276,7 @@ export interface PayinFilters {
   to?: string
   updatedFrom?: string
   updatedTo?: string
+  includeTotal?: boolean
   page?: number
   limit?: number
 }
@@ -258,15 +287,12 @@ export async function getAdminPayins(params: PayinFilters = {}) {
     if (value === undefined || value === null || value === '') return
     qs.set(key, String(value))
   }
-  set('q', params.q)
   set('groupId', params.groupId)
   set('orderId', params.orderId ?? params.payOrderNo)
   set('outTradeNo', params.outTradeNo)
   set('uid', params.uid)
-  set('upi', params.upi ?? params.upiId)
   set('amount', params.amount)
   set('status', params.status)
-  set('payUrl', params.payUrl ?? params.payURL)
   set('payState', params.payState)
   set('currencyCode', params.currencyCode)
   set('payType', params.payType)
@@ -275,6 +301,7 @@ export async function getAdminPayins(params: PayinFilters = {}) {
   set('createdTo', params.createdTo ?? params.to)
   set('updatedFrom', params.updatedFrom)
   set('updatedTo', params.updatedTo)
+  set('includeTotal', params.includeTotal)
   set('page', params.page)
   set('limit', params.limit)
   const suffix = qs.toString() ? `?${qs.toString()}` : ''
@@ -285,7 +312,133 @@ export async function getAdminPayins(params: PayinFilters = {}) {
     limit?: number
     total?: number
     totalPages?: number
+    hasMore?: boolean
   }
+}
+
+export interface AdminTransaction {
+  transactionNo?: string | null
+  uid: string
+  groupId: number
+  amount: string
+  type: 'credit' | 'debit' | string
+  coType: 'payin' | 'payout' | 'bonus' | 'adjustment' | 'other' | string
+  balanceAfter?: string | null
+  remark?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface TransactionFilters {
+  uid?: string
+  groupId?: number | string
+  type?: string
+  coType?: string
+  payin?: string
+  transactionNo?: string
+  date?: string
+  createdFrom?: string
+  from?: string
+  createdTo?: string
+  to?: string
+  amountFrom?: number | string
+  minAmount?: number | string
+  amountTo?: number | string
+  maxAmount?: number | string
+  includeTotal?: boolean
+  page?: number
+  limit?: number
+}
+
+export interface CreateAdminTransactionResponse extends AdminResponse {
+  group: Pick<AdminGroup, 'uid' | 'groupId' | 'balance'>
+  transaction: AdminTransaction
+}
+
+export async function createAdminTransaction(
+  uid: string,
+  type: 'credit' | 'debit',
+  amount: string,
+  remark?: string,
+) {
+  const data = await request('/admin/transactions', {
+    method: 'POST',
+    body: JSON.stringify({ uid, type, amount, ...(remark ? { remark } : {}) }),
+  })
+  return data as CreateAdminTransactionResponse
+}
+
+export async function getAdminTransactions(params: TransactionFilters = {}) {
+  const qs = new URLSearchParams()
+  const set = (key: string, value: unknown) => {
+    if (value === undefined || value === null || value === '') return
+    qs.set(key, String(value))
+  }
+  set('uid', params.uid)
+  set('groupId', params.groupId)
+  set('type', params.type)
+  set('coType', params.coType)
+  set('payin', params.payin)
+  set('transactionNo', params.transactionNo)
+  set('date', params.date)
+  set('createdFrom', params.createdFrom ?? params.from)
+  set('createdTo', params.createdTo ?? params.to)
+  set('amountFrom', params.amountFrom ?? params.minAmount)
+  set('amountTo', params.amountTo ?? params.maxAmount)
+  set('includeTotal', params.includeTotal)
+  set('page', params.page)
+  set('limit', params.limit)
+  const suffix = qs.toString() ? `?${qs.toString()}` : ''
+  const data = await request(`/admin/transactions${suffix}`, { method: 'GET' })
+  return data as AdminResponse & {
+    transactions: AdminTransaction[]
+    page?: number
+    limit?: number
+    total?: number
+    totalPages?: number
+    hasMore?: boolean
+  }
+}
+
+export interface CreateAdminPayoutRequest {
+  uid?: string
+  groupId?: number
+  amount: number | string
+  currencyCode?: string
+  bankCode: 'IMPS' | 'UPI'
+  identityType: 'IMPS' | 'UPI'
+  bankAcctNo: string
+  bankAcctName?: string
+  bankFirstName?: string
+  bankLastName?: string
+  accPhone: string
+  accEmail: string
+  identityNo: string
+  notifyUrl?: string
+  remark?: string
+}
+
+export interface CreateAdminPayoutResponse extends AdminResponse {
+  debited?: boolean
+  payoutOrderNo?: string
+  outTradeNo?: string
+  remitOrderNo?: string
+  resultCode?: string
+  resultMsg?: string
+  state?: string
+  group?: {
+    uid?: string
+    groupId?: number
+    balance?: string
+  }
+}
+
+export async function createAdminPayout(body: CreateAdminPayoutRequest) {
+  const data = await request('/admin/payouts', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return data as CreateAdminPayoutResponse
 }
 
 export async function approveAdminPayin(id: string, utrCode?: string) {

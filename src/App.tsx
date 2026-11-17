@@ -7,6 +7,8 @@ import TagsView from './components/TagsView'
 import ToastContainer, { useToast } from './components/Toast'
 import GroupsView from './views/GroupsView'
 import PayinsView from './views/PayinsView'
+import PayoutsView from './views/PayoutsView'
+import TransactionsView from './views/TransactionsView'
 import { adminLogin } from './api/client'
 import { clearSession, getStoredUser, isAuthenticated, setSession } from './auth'
 
@@ -24,6 +26,8 @@ function App() {
   const [groupsLimit, setGroupsLimit] = useState(20)
   const [payinsPage, setPayinsPage] = useState(1)
   const [payinsLimit, setPayinsLimit] = useState(20)
+  const [transactionsPage, setTransactionsPage] = useState(1)
+  const [transactionsLimit, setTransactionsLimit] = useState(20)
 
   const handleLogin = async (mobile: string, password: string) => {
     setLoginLoading(true)
@@ -65,6 +69,8 @@ function App() {
     '/': 'Dashboard',
     '/groups': 'Groups',
     '/payins': 'Payins',
+    '/payouts': 'Payouts',
+    '/transactions': 'Transactions',
   }
 
   if (!user) {
@@ -115,6 +121,8 @@ function App() {
         items={[
           { key: 'groups', to: '/groups', label: 'Groups' },
           { key: 'payins', to: '/payins', label: 'Payins' },
+          { key: 'payouts', to: '/payouts', label: 'Payouts' },
+          { key: 'transactions', to: '/transactions', label: 'Transactions' },
         ]}
         brand="RRPAY"
         badge="Admin"
@@ -158,6 +166,15 @@ function App() {
                   onPageChange={setPayinsPage}
                   onLimitChange={setPayinsLimit}
                 />
+              ) : path === '/transactions' ? (
+                <TransactionsView
+                  page={transactionsPage}
+                  limit={transactionsLimit}
+                  onPageChange={setTransactionsPage}
+                  onLimitChange={setTransactionsLimit}
+                />
+              ) : path === '/payouts' ? (
+                <PayoutsView />
               ) : (
                 <section className="admin-card admin-card p-4 text-ink">
                   <p className="text-sm text-ink-muted">No content for {path} yet.</p>
